@@ -1,8 +1,11 @@
-from classes import Coord,Obstacle
+from classes.obstacle import Obstacle
+from classes.coord import Coord
+from classes.uav import Uav
 
 class Environment:
     __instance = None
     obstacles:list[Obstacle]
+    uavs:list[Uav]
 
     def __init__(self) -> None:
         self.size = Coord(0,0)

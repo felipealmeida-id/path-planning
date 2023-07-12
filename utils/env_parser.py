@@ -14,3 +14,4 @@ def parse_env():
     load_dotenv()
     validators:Dict[str,Callable[[str,bool],bool]] = {}
     validators['UAV_BATTERY'] = non_positive_integer
+    validators['UAV_AMOUNT'] = lambda x: non_zero(non_negative_integer(x))

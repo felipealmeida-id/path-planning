@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from classes import Uav
-from utils import Move
+from utils.enums import Move
+from classes.uav import Uav
 
 class MoveHeuristic:
     def __init__(self):

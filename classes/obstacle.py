@@ -1,4 +1,4 @@
-from classes import Coord,Environment
+from .coord import Coord
 
 class Obstacle:
     sections:list[Coord]
@@ -10,7 +10,8 @@ class Obstacle:
         self.dimsEnd = dimsEnd
         self.sections = self._to_sections()
 
-    def _to_sections(self) -> list[Coord]:
+    def _to_sections(self):
+        from .environment import Environment
         sections = []
         env = Environment.get_instance()
         percentageOfSectionInitX = env.size.x * self.dimsInit.x

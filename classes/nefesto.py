@@ -1,4 +1,4 @@
-from heuristic import MoveHeuristic
+from .heuristic import MoveHeuristic
 
 class Nefesto(MoveHeuristic):
     def __init__(self):
