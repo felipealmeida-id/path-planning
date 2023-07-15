@@ -1,3 +1,7 @@
-from classes.nefesto import Nefesto
+from classes.environment import Environment
 
-heuristic = Nefesto()
+env = Environment.get_instance()
+env.iterate()
+env.iterate()
+env.iterate()
+env.iterate()
