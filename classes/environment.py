@@ -3,13 +3,15 @@ from classes.coord import Coord
 from classes.uav import Uav
 from classes.heuristic import MoveHeuristic
 from classes.nefesto import Nefesto
-from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY
+from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME
 
 class Environment:
     __instance = None
     obstacles:list[Obstacle]
     uavs:list[Uav]
     heuristic:MoveHeuristic
+    total_time:int
+    time_elapsed:int
 
     def __init__(self) -> None:
         self.size = Coord(ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS)
@@ -18,6 +20,8 @@ class Environment:
         self.obstacles = []
         self.pois = []
         self.heuristic = Nefesto()
+        self.total_time = TOTAL_TIME
+        self.time_elapsed = 0
     
     @classmethod
     def get_instance(cls):
@@ -35,7 +39,9 @@ class Environment:
         return any(collisions)
     
     def iterate(self):
-        for uav in self.uavs:
-            move = self.heuristic.get_move(uav)
+        enumeration_uavs = enumerate(self.uavs)
+        for uav_index,uav in enumeration_uavs:
+            move = self.heuristic.get_move(uav=uav)
             uav.move(move)
             print(uav.position)
+        self.time_elapsed += 1

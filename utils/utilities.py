@@ -63,3 +63,9 @@ def move_delta(move:Move):
     dx = x_delta(move)
     dy = y_delta(move)
     return dx , dy
+
+def check_parameters(kwargs:dict[str,any],params:list[str]):
+    for param in params:
+        value_of_param = kwargs.get(param)
+        if value_of_param == None:
+            raise ValueError(f"Parameter {param} not provided")

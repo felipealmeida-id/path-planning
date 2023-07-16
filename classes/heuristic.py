@@ -7,5 +7,5 @@ class MoveHeuristic:
         pass
 
     @abstractmethod
-    def get_move(self,uav:Uav) -> Move:
+    def get_move(self,**kwargs) -> Move:
         pass
