@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from typing import Dict,Callable
 from os import getenv
+from os.path import exists as file_exists
 
 def non_negative_integer(args:tuple[str,bool]):
     x:str = args[0]
@@ -52,7 +53,16 @@ def parse_env():
         if not var_is_valid:
             raise ValueError(f"Env var {var_name} is not valid")
 
-load_dotenv()
+# Check which environment to load
+PY_ENV = getenv('PY_ENV')
+if PY_ENV is None:
+    raise ValueError('PY_ENV is not specified')
+if not file_exists(f"./envs/.env.{PY_ENV}"):
+    raise KeyError(f"env \"{PY_ENV}\" does not exist")
+print(f"Loading .env.{PY_ENV}")
+
+# Load environment
+load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
 parse_env()
 ENVIRONMENT_X_AXIS = int(getenv('ENVIRONMENT_X_AXIS'))
 ENVIRONMENT_Y_AXIS = int(getenv('ENVIRONMENT_Y_AXIS'))
