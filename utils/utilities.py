@@ -68,4 +68,4 @@ def check_parameters(kwargs:dict[str,any],params:list[str]):
     for param in params:
         value_of_param = kwargs.get(param)
         if value_of_param == None:
-            raise ValueError(f"Parameter {param} not provided")
+            raise ValueError(f"Parameter {param} not provided to move heruistic")

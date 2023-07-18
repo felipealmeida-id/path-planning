@@ -6,14 +6,12 @@ try:
 
     from random import seed
     from classes.environment import Environment
+    from utils.env_parser import TOTAL_TIME
     
     seed(2023)
     env = Environment.get_instance()
-    env.uavs[0].possible_moves()
-    env.iterate()
-    env.iterate()
-    env.iterate()
-    env.iterate()
+    for i in range(TOTAL_TIME):
+        env.iterate()
 except ValueError as e:
     print(str(e.args[0]))
 except KeyError as e:

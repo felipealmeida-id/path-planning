@@ -40,7 +40,6 @@ class Uav:
         for pos,move in zip(end_positions,all_moves):
             pos.apply_delta(move_delta(move))
         filtered_moves = filter(env.is_inbound,end_positions)
-        print(list(map(delta_to_move,filtered_moves)))
         return list(map(delta_to_move,filtered_moves))
         
     def get_move_to_base(self):

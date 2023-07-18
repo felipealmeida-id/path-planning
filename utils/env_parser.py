@@ -33,7 +33,7 @@ def coord_list(args:tuple[str,bool]):
         eval(x)
     except SyntaxError:
         return x,False
-    return x,True
+    return x,success and True
 
 def parse_env():
     validators:Dict[str,Callable[[str,bool],tuple[str,bool]]] = {}
@@ -41,7 +41,7 @@ def parse_env():
     validators['ENVIRONMENT_Y_AXIS'] = greater_than_zero
     validators['INITIAL_TURN_ON_PROBABILITY'] = greater_than_zero
     validators['POINTS_OF_INTEREST_AMOUNT'] = greater_than_zero
-    validators['POINTS_OF_INTEREST_COORDS'] = greater_than_zero
+    validators['POINTS_OF_INTEREST_COORDS'] = coord_list
     validators['TOTAL_TIME'] = greater_than_zero
     validators['UAV_BATTERY'] = greater_than_zero
     validators['UAV_AMOUNT'] = greater_than_zero
@@ -49,20 +49,22 @@ def parse_env():
         var_value = getenv(var_name)
         if var_value is None:
             raise ValueError(f"Env var {var_name} missing")
-        _,var_is_valid = validator(var_value)
+        _,var_is_valid = validator((var_value,))
         if not var_is_valid:
             raise ValueError(f"Env var {var_name} is not valid")
 
 # Check which environment to load
-PY_ENV = getenv('PY_ENV')
-if PY_ENV is None:
-    raise ValueError('PY_ENV is not specified')
-if not file_exists(f"./envs/.env.{PY_ENV}"):
-    raise KeyError(f"env \"{PY_ENV}\" does not exist")
-print(f"Loading .env.{PY_ENV}")
+# PY_ENV = getenv('PY_ENV')
+# if PY_ENV is None:
+#     raise ValueError('PY_ENV is not specified')
+# if not file_exists(f"./envs/.env.{PY_ENV}"):
+#     raise KeyError(f"env \"{PY_ENV}\" does not exist")
+# print(f"Loading .env.{PY_ENV}")
 
 # Load environment
-load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
+# load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
+load_dotenv(dotenv_path=f"./envs/.env.local")
+
 parse_env()
 ENVIRONMENT_X_AXIS = int(getenv('ENVIRONMENT_X_AXIS'))
 ENVIRONMENT_Y_AXIS = int(getenv('ENVIRONMENT_Y_AXIS'))
