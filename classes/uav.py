@@ -21,16 +21,17 @@ class Uav:
     def move(self,move:Move):
         from .environment import Environment
         env = Environment.get_instance()
+        self.battery += 1 if self.charging else -1
         if self.charging:
-            self.battery += 1
             if self.battery == self.max_battery:
                 self.charging = False
-            return
-        delta = move_delta(move)
+            return self.position
+        actual_move = move if self.get_effective_battery() > 0 else self.get_move_to_base()
+        delta = move_delta(actual_move)
         self.position.apply_delta(delta)
-        self.battery -= 1
         if (self.position == env.start) and (self.get_effective_battery() == 0):
             self.charging = True
+        return self.position
     
     def possible_moves(self):
         from .environment import Environment
@@ -39,6 +40,7 @@ class Uav:
         for pos,move in zip(end_positions,all_moves):
             pos.apply_delta(move_delta(move))
         filtered_moves = filter(env.is_inbound,end_positions)
+        print(list(map(delta_to_move,filtered_moves)))
         return list(map(delta_to_move,filtered_moves))
         
     def get_move_to_base(self):

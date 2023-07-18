@@ -22,12 +22,26 @@ def greater_than_zero(args:tuple[str,bool]):
     success = args[1] if len(args) > 1 else True
     return non_zero(non_negative_integer((x,success)))
 
+def coord_list(args:tuple[str,bool]):
+    x = args[0]
+    success = args[1] if len(args) > 1 else True
+    if len(x) < 2 or x[0] != "[" or x[-1] != "]":
+        return x,False
+    x = x[1:-1]
+    try:
+        eval(x)
+    except SyntaxError:
+        return x,False
+    return x,True
+
 def parse_env():
     validators:Dict[str,Callable[[str,bool],tuple[str,bool]]] = {}
     validators['ENVIRONMENT_X_AXIS'] = greater_than_zero
     validators['ENVIRONMENT_Y_AXIS'] = greater_than_zero
-    validators['TOTAL_TIME'] = greater_than_zero
     validators['INITIAL_TURN_ON_PROBABILITY'] = greater_than_zero
+    validators['POINTS_OF_INTEREST_AMOUNT'] = greater_than_zero
+    validators['POINTS_OF_INTEREST_COORDS'] = greater_than_zero
+    validators['TOTAL_TIME'] = greater_than_zero
     validators['UAV_BATTERY'] = greater_than_zero
     validators['UAV_AMOUNT'] = greater_than_zero
     for var_name,validator in validators.items():
@@ -42,7 +56,8 @@ load_dotenv()
 parse_env()
 ENVIRONMENT_X_AXIS = int(getenv('ENVIRONMENT_X_AXIS'))
 ENVIRONMENT_Y_AXIS = int(getenv('ENVIRONMENT_Y_AXIS'))
-TOTAL_TIME = int(getenv('TOTAL_TIME'))
+POINTS_OF_INTEREST_AMOUNT = int(getenv('POINTS_OF_INTEREST_AMOUNT'))
 INITIAL_TURN_ON_PROBABILITY = int(getenv('INITIAL_TURN_ON_PROBABILITY'))
+TOTAL_TIME = int(getenv('TOTAL_TIME'))
 UAV_AMOUNT = int(getenv('UAV_AMOUNT'))
 UAV_BATTERY = int(getenv('UAV_BATTERY'))
