@@ -6,6 +6,7 @@ class Coord:
     def apply_delta(self,delta:tuple[int,int]):
         self.x = self.x+delta[0]
         self.y = self.y+delta[1]
+        return self
 
     def copy(self):
         return Coord(self.x,self.y)

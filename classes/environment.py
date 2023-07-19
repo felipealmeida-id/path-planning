@@ -2,9 +2,10 @@ from classes.obstacle import Obstacle
 from classes.coord import Coord
 from classes.uav import Uav
 from classes.heuristic import MoveHeuristic
-from classes.nefesto import Nefesto
+from classes.ardemisa import Ardemisa
 from classes.point_of_interest import Point_Of_Interest
-from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_AMOUNT
+from utils.enums import Move
+from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES
 
 class Environment:
     __instance = None
@@ -20,8 +21,9 @@ class Environment:
         self.start = Coord(0,0)
         self.uavs = [Uav(self.start.copy(),UAV_BATTERY) for _ in range(UAV_AMOUNT)]
         self.obstacles = []
-        self.points_of_interest = [Point_Of_Interest for _ in range(POINTS_OF_INTEREST_AMOUNT)]
-        self.heuristic = Nefesto()
+        pois_times_and_coords = zip(POINTS_OF_INTEREST_VISIT_TIMES,POINTS_OF_INTEREST_COORDS)
+        self.points_of_interest = [Point_Of_Interest(visit_time,Coord(x,y)) for visit_time,(x,y) in pois_times_and_coords]
+        self.heuristic = Ardemisa()
         self.total_time = TOTAL_TIME
         self.time_elapsed = 0
     
@@ -41,10 +43,16 @@ class Environment:
         return any(collisions)
     
     def iterate(self):
+        resulting_moves:dict[int,Move] = {}
         surveyed_coords = []
         enumeration_uavs = enumerate(self.uavs)
         for uav_index,uav in enumeration_uavs:
-            move = self.heuristic.get_move(uav=uav,time=self.time_elapsed,uav_index=uav_index)
+            if uav.charging:
+                move = Move.STAY
+            else:
+                move = self.heuristic.get_move(uav=uav,time=self.time_elapsed,uav_index=uav_index,points_of_interest=self.points_of_interest)
             surveying = uav.move(move)
             surveyed_coords.append(surveying)
+            resulting_moves[uav_index] = move
         self.time_elapsed += 1
+        return resulting_moves
