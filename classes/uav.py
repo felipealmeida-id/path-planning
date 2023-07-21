@@ -29,14 +29,15 @@ class Uav:
             if self.current_charge == UAV_CHARGE_TIME:
                 self.charging = False
                 self.current_charge = 0
-            return self.position
+                self.battery = self.max_battery
+            return self.position,Move.STAY
         actual_move = move if self.get_effective_battery() > 0 else self.get_move_to_base()
         delta = move_delta(actual_move)
         self.position.apply_delta(delta)
         self.battery -= 1
         if (self.position == env.start) and (self.get_effective_battery() == 0):
             self.charging = True
-        return self.position
+        return self.position,actual_move
     
     def possible_moves(self):
         from .environment import Environment
@@ -50,7 +51,7 @@ class Uav:
     def get_move_to_base(self):
         from .environment import Environment
         env = Environment.get_instance()
-        delta = self.position - env.start
+        delta = env.start - self.position
         return delta_to_move(delta)
 
     def distance_to_base(self):

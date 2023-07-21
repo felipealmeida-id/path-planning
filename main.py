@@ -15,6 +15,8 @@ try:
         moves = env.iterate()
         for uav_index,move in moves.items():
             all_moves[uav_index].append(move)
-    print(all_moves)
+    
+    from utils.utilities import save_to_output
+    save_to_output(all_moves)
 except Exception as e:
     print(str(e.args[0]))

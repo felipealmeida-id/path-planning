@@ -51,8 +51,8 @@ class Environment:
                 move = Move.STAY
             else:
                 move = self.heuristic.get_move(uav=uav,time=self.time_elapsed,uav_index=uav_index,points_of_interest=self.points_of_interest)
-            surveying = uav.move(move)
+            surveying,performed_move = uav.move(move)
             surveyed_coords.append(surveying)
-            resulting_moves[uav_index] = move
+            resulting_moves[uav_index] = performed_move
         self.time_elapsed += 1
         return resulting_moves
