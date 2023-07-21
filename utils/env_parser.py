@@ -66,6 +66,8 @@ def parse_env():
     validators['INITIAL_TURN_ON_PROBABILITY'] = greater_than_zero
     validators['POINTS_OF_INTEREST_COORDS'] = coord_list
     validators['POINTS_OF_INTEREST_VISIT_TIMES'] = num_list
+    validators['START_X_COORD'] = non_negative_integer
+    validators['START_Y_COORD'] = non_negative_integer
     validators['TOTAL_TIME'] = greater_than_zero
     validators['UAV_BATTERY'] = greater_than_zero
     validators['UAV_AMOUNT'] = greater_than_zero
@@ -92,9 +94,11 @@ load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
 parse_env()
 ENVIRONMENT_X_AXIS = int(getenv('ENVIRONMENT_X_AXIS'))
 ENVIRONMENT_Y_AXIS = int(getenv('ENVIRONMENT_Y_AXIS'))
+INITIAL_TURN_ON_PROBABILITY = int(getenv('INITIAL_TURN_ON_PROBABILITY'))
 POINTS_OF_INTEREST_COORDS = parse_coord_list(getenv('POINTS_OF_INTEREST_COORDS'))
 POINTS_OF_INTEREST_VISIT_TIMES = parse_num_list(getenv('POINTS_OF_INTEREST_VISIT_TIMES'))
-INITIAL_TURN_ON_PROBABILITY = int(getenv('INITIAL_TURN_ON_PROBABILITY'))
+START_X_COORD = int(getenv('START_X_COORD'))
+START_Y_COORD = int(getenv('START_Y_COORD'))
 TOTAL_TIME = int(getenv('TOTAL_TIME'))
 UAV_AMOUNT = int(getenv('UAV_AMOUNT'))
 UAV_BATTERY = int(getenv('UAV_BATTERY'))

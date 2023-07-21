@@ -5,7 +5,7 @@ from classes.heuristic import MoveHeuristic
 from classes.ardemisa import Ardemisa
 from classes.point_of_interest import Point_Of_Interest
 from utils.enums import Move
-from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES
+from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES,START_X_COORD,START_Y_COORD
 
 class Environment:
     __instance = None
@@ -18,7 +18,7 @@ class Environment:
 
     def __init__(self) -> None:
         self.size = Coord(ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS)
-        self.start = Coord(0,0)
+        self.start = Coord(START_X_COORD,START_Y_COORD)
         self.uavs = [Uav(self.start.copy(),UAV_BATTERY) for _ in range(UAV_AMOUNT)]
         self.obstacles = []
         pois_times_and_coords = zip(POINTS_OF_INTEREST_VISIT_TIMES,POINTS_OF_INTEREST_COORDS)

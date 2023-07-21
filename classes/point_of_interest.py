@@ -12,3 +12,12 @@ class Point_Of_Interest:
 
     def visit(self,time:int):
         self.last_visit = time
+
+    def __repr__(self):
+        return f"POI at {self.position}"
+
+    def __eq__(self,other:'Point_Of_Interest'):
+        return self.position == other.position
+    
+    def __hash__(self):
+        return hash((self.position.x,self.position.y,self.last_visit,self.visit_time))

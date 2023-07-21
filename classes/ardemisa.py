@@ -8,9 +8,11 @@ from utils.utilities import check_parameters,delta_to_move,move_delta
 
 class Ardemisa(MoveHeuristic):
     targeting:dict[int,Point_Of_Interest] = {}
+    targetted_points:set[Point_Of_Interest] = set()
 
     def get_move(self,**kwargs) -> Move:
         # Parse arguments
+        print(self.targetted_points)
         check_parameters(kwargs,ardemisa_move_params)
         uav:Uav = kwargs.get('uav')
         uav_index:int = kwargs.get('uav_index')
@@ -24,6 +26,7 @@ class Ardemisa(MoveHeuristic):
         uav_target_delta = uav_current_target.position - uav.position
         chosen_move = delta_to_move(uav_target_delta)
         if uav.position.copy().apply_delta(move_delta(chosen_move)) == uav_current_target.position:
+             self.targetted_points.remove(uav_current_target)
              self.targeting.pop(uav_index)
         return chosen_move
 
@@ -32,7 +35,8 @@ class Ardemisa(MoveHeuristic):
         uav_current_target = self.targeting.get(uav_index)
         if uav_current_target is None:
             for poi in points_of_interest:
-                if time - poi.last_visit > poi.visit_time:
+                if poi not in self.targetted_points and (time - poi.last_visit > poi.visit_time):
                     self.targeting[uav_index] = poi
+                    self.targetted_points.add(poi)
                     return poi
         return uav_current_target

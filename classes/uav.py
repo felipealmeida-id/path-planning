@@ -42,11 +42,9 @@ class Uav:
     def possible_moves(self):
         from .environment import Environment
         env = Environment.get_instance()
-        end_positions = [self.position.copy() for _ in all_moves]
-        for pos,move in zip(end_positions,all_moves):
-            pos.apply_delta(move_delta(move))
-        filtered_moves = filter(env.is_inbound,end_positions)
-        return list(map(delta_to_move,filtered_moves))
+        end_positions = [(self.position.copy().apply_delta(move_delta(move)),move) for move in all_moves]
+        filtered_moves = filter(lambda pos_move:env.is_inbound(pos_move[0]),end_positions)
+        return list(map(lambda pos_move:pos_move[1],filtered_moves))
         
     def get_move_to_base(self):
         from .environment import Environment
