@@ -1,11 +1,11 @@
-from classes.obstacle import Obstacle
-from classes.coord import Coord
-from classes.uav import Uav
-from classes.heuristic import MoveHeuristic
-from classes.ardemisa import Ardemisa
-from classes.point_of_interest import Point_Of_Interest
-from utils.enums import Move
-from utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES,START_X_COORD,START_Y_COORD
+from .obstacle import Obstacle
+from .coord import Coord
+from .uav import Uav
+from .heuristic import MoveHeuristic
+from .ardemisa import Ardemisa
+from .point_of_interest import Point_Of_Interest
+from ..utils.enums import Move
+from ..utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES,START_X_COORD,START_Y_COORD
 
 class Environment:
     __instance = None

@@ -1,5 +1,5 @@
-from classes.coord import Coord
-from utils.enums import Move
+from ..classes.coord import Coord
+from .enums import Move
 from .env_parser import PY_ENV
 
 def delta_to_move(coord:Coord) -> Move:
@@ -72,7 +72,7 @@ def check_parameters(kwargs:dict[str,any],params:list[str]):
             raise ValueError(f"Parameter {param} not provided to move heruistic")
 
 def save_to_output(moves:dict[int,list[Move]]):
-    with open(f'./output/output.{PY_ENV}.txt',"w") as file:
+    with open(f'./pather/output/output.{PY_ENV}.txt',"w") as file:
         lines_to_write = []
         for moves in moves.values():
             moves_as_nums = ' '.join(list(map(lambda move:str(move.value),moves)))

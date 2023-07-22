@@ -1,8 +1,8 @@
-from classes.coord import Coord
-from utils.enums import Move
-from utils.constants import all_moves
-from utils.utilities import distance,move_delta,delta_to_move
-from utils.env_parser import UAV_CHARGE_TIME
+from .coord import Coord
+from ..utils.enums import Move
+from ..utils.constants import all_moves
+from ..utils.utilities import distance,move_delta,delta_to_move
+from ..utils.env_parser import UAV_CHARGE_TIME
 
 class Uav:
     position:Coord

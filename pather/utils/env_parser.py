@@ -85,12 +85,12 @@ def parse_env():
 PY_ENV = getenv('PY_ENV')
 if PY_ENV is None:
     raise ValueError('PY_ENV is not specified')
-if not file_exists(f"./envs/.env.{PY_ENV}"):
+if not file_exists(f"./pather/envs/.env.{PY_ENV}"):
     raise TypeError(f"env \"{PY_ENV}\" does not exist")
 print(f"Loading .env.{PY_ENV}")
 
 # Load environment
-load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
+load_dotenv(dotenv_path=f"./pather./envs/.env.{PY_ENV}")
 
 parse_env()
 ENVIRONMENT_X_AXIS = int(getenv('ENVIRONMENT_X_AXIS'))
