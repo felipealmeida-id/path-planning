@@ -12,7 +12,6 @@ class Ardemisa(MoveHeuristic):
 
     def get_move(self,**kwargs) -> Move:
         # Parse arguments
-        print(self.targetted_points)
         check_parameters(kwargs,ardemisa_move_params)
         uav:Uav = kwargs.get('uav')
         uav_index:int = kwargs.get('uav_index')
