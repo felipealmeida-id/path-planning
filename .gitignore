@@ -1,4 +1,3 @@
-envs
 */**/__pycache__
 *.out
 output/*
