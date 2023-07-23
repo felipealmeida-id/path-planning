@@ -54,7 +54,6 @@ class Environment:
             surveying,performed_move = uav.move(move)
             surveyed_coords.append(surveying)
             resulting_moves[uav_index] = performed_move
-
         for poi in self.points_of_interest:
             if poi.position in surveyed_coords:
                 poi.visit(self.time_elapsed)
