@@ -35,7 +35,7 @@ class Uav:
         delta = move_delta(actual_move)
         self.position.apply_delta(delta)
         self.battery -= 1
-        if (self.position == env.start) and (self.get_effective_battery() == 0):
+        if (self.position == env.start) and (self.get_effective_battery() < 2):
             self.charging = True
         return self.position,actual_move
     
@@ -55,4 +55,13 @@ class Uav:
     def distance_to_base(self):
         from .environment import Environment
         env = Environment.get_instance()
-        return distance(self.position,env.start)
+        return distance(self.position,env.start) + 1
+
+    def __repr__(self):
+        return f"""UAV
+        position:{self.position} 
+        battery:{self.battery}
+        charging:{self.charging}
+        current_charge:{self.current_charge}
+        dist_to_base:{self.distance_to_base()}
+        """

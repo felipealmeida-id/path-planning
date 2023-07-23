@@ -20,4 +20,4 @@ class Point_Of_Interest:
         return self.position == other.position
     
     def __hash__(self):
-        return hash((self.position.x,self.position.y,self.last_visit,self.visit_time))
+        return hash((self.position.x,self.position.y,self.visit_time))

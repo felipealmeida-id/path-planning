@@ -11,10 +11,10 @@ class Environment:
     __instance = None
     obstacles:list[Obstacle]
     uavs:list[Uav]
+    points_of_interest:list[Point_Of_Interest]
     heuristic:MoveHeuristic
     total_time:int
     time_elapsed:int
-    points_of_interest:list[Point_Of_Interest]
 
     def __init__(self) -> None:
         self.size = Coord(ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS)
@@ -54,5 +54,10 @@ class Environment:
             surveying,performed_move = uav.move(move)
             surveyed_coords.append(surveying)
             resulting_moves[uav_index] = performed_move
+            if uav_index % 2 == 0:
+                print(uav)
+        for poi in self.points_of_interest:
+            if poi.position in surveyed_coords:
+                poi.visit(self.time_elapsed)
         self.time_elapsed += 1
         return resulting_moves
