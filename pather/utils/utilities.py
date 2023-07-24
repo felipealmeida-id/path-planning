@@ -1,6 +1,6 @@
 from ..classes.coord import Coord
 from .enums import Move
-from .env_parser import PY_ENV
+from env_parser import PY_ENV
 
 def delta_to_move(coord:Coord) -> Move:
     if coord.x > 0:

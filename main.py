@@ -1,20 +1,24 @@
 import sys
 import random
 import os
-
+from pather.main import pather
+from gan_perceptron.main import gan_perceptron
 # Initialize specific environment
 os.environ['PY_ENV'] = sys.argv[1]
-
-from pather.classes.environment import Environment
-from pather.utils.env_parser import TOTAL_TIME,UAV_AMOUNT
-
 random.seed(2023)
-all_moves = {uav_index: [] for uav_index in range(UAV_AMOUNT)}
-env = Environment.get_instance()
-for i in range(TOTAL_TIME):
-    moves = env.iterate()
-    for uav_index,move in moves.items():
-        all_moves[uav_index].append(move)
 
-from pather.utils.utilities import save_to_output
-save_to_output(all_moves)
+module = sys.argv[2]
+
+switch_dict = {
+    "pather":pather,
+    "gan":gan_perceptron
+}
+
+if module in switch_dict:
+    os.environ['MODULE'] = module
+    from env_parser import parse_env
+    parse_env(module)
+    switch_dict[module]()
+else:
+    print(f"Invalid command \"{module}\"")
+    print(f'Valid commands are: {list(switch_dict.keys())}')

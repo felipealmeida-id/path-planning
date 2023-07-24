@@ -5,7 +5,7 @@ from .heuristic import MoveHeuristic
 from .ardemisa import Ardemisa
 from .point_of_interest import Point_Of_Interest
 from ..utils.enums import Move
-from ..utils.env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES,START_X_COORD,START_Y_COORD,OBSTACLES_COORDS
+from env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES,START_X_COORD,START_Y_COORD,OBSTACLES_COORDS
 
 class Environment:
     __instance = None
