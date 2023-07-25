@@ -71,8 +71,8 @@ def check_parameters(kwargs:dict[str,any],params:list[str]):
         if value_of_param == None:
             raise ValueError(f"Parameter {param} not provided to move heruistic")
 
-def save_to_output(moves:dict[int,list[Move]]):
-    with open(f'./pather/output/output.{PY_ENV}.txt',"w") as file:
+def save_to_output(moves:dict[int,list[Move]],id:str):
+    with open(f'./pather/output/output.{PY_ENV}.{id}.txt',"w") as file:
         lines_to_write = []
         for moves in moves.values():
             moves_as_nums = ' '.join(list(map(lambda move:str(move.value),moves)))

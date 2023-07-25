@@ -9,3 +9,7 @@ class MoveHeuristic:
     @abstractmethod
     def get_move(self,**kwargs) -> Move:
         pass
+
+    @abstractmethod
+    def reset(self):
+        pass

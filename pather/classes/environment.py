@@ -59,3 +59,16 @@ class Environment:
                 poi.visit(self.time_elapsed)
         self.time_elapsed += 1
         return resulting_moves
+    
+    def reset(self):
+        self.time_elapsed = 0
+        self.heuristic.reset()
+        for poi in self.points_of_interest:
+            poi.last_visit = 0
+        for uav in self.uavs:
+            uav.battery = uav.max_battery
+            uav.position = self.start.copy()
+            uav.charging = False
+            uav.current_charge = 0
+         
+        

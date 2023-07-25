@@ -3,7 +3,7 @@ def pather():
     from env_parser import TOTAL_TIME,UAV_AMOUNT
     all_moves = {uav_index: [] for uav_index in range(UAV_AMOUNT)}
     env = Environment.get_instance()
-    for i in range(TOTAL_TIME):
+    for _ in range(TOTAL_TIME):
         moves = env.iterate()
         for uav_index,move in moves.items():
             all_moves[uav_index].append(move)

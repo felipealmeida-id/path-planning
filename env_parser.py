@@ -83,6 +83,7 @@ def parse_env_pather():
     validators['ENVIRONMENT_X_AXIS'] = greater_than_zero_int
     validators['ENVIRONMENT_Y_AXIS'] = greater_than_zero_int
     validators['INITIAL_TURN_ON_PROBABILITY'] = greater_than_zero_int
+    validators['SAMPLES_TO_GENERATE'] = greater_than_zero_int
     validators['OBSTACLES_COORDS'] = coord_list
     validators['POINTS_OF_INTEREST_COORDS'] = coord_list
     validators['POINTS_OF_INTEREST_VISIT_TIMES'] = num_list
@@ -135,7 +136,8 @@ NOISE_DIMENSION = int(getenv('NOISE_DIMENSION'))
 OBSTACLES_COORDS = parse_coord_list(getenv('OBSTACLES_COORDS'))
 POINTS_OF_INTEREST_COORDS = parse_coord_list(getenv('POINTS_OF_INTEREST_COORDS'))
 POINTS_OF_INTEREST_VISIT_TIMES = parse_num_list(getenv('POINTS_OF_INTEREST_VISIT_TIMES'))
-SAMPLE_SIZE=int(getenv('SAMPLE_SIZE'))
+SAMPLE_SIZE = int(getenv('SAMPLE_SIZE'))
+SAMPLES_TO_GENERATE = int(getenv('SAMPLES_TO_GENERATE'))
 START_X_COORD = int(getenv('START_X_COORD'))
 START_Y_COORD = int(getenv('START_Y_COORD'))
 TOTAL_TIME = int(getenv('TOTAL_TIME'))

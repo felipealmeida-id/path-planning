@@ -39,3 +39,7 @@ class Ardemisa(MoveHeuristic):
                     self.targetted_points.add(poi)
                     return poi
         return uav_current_target
+    
+    def reset(self):
+        self.targeting.clear()
+        self.targetted_points.clear()
