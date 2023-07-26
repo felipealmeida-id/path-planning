@@ -5,7 +5,7 @@ from .heuristic import MoveHeuristic
 from .ardemisa import Ardemisa
 from .point_of_interest import Point_Of_Interest
 from ..utils.enums import Move
-from env_parser import UAV_AMOUNT,ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS,UAV_BATTERY,TOTAL_TIME,POINTS_OF_INTEREST_COORDS,POINTS_OF_INTEREST_VISIT_TIMES,START_X_COORD,START_Y_COORD,OBSTACLES_COORDS
+from env_parser import Env
 
 class Environment:
     __instance = None
@@ -17,14 +17,15 @@ class Environment:
     time_elapsed:int
 
     def __init__(self) -> None:
-        self.size = Coord(ENVIRONMENT_X_AXIS,ENVIRONMENT_Y_AXIS)
-        self.start = Coord(START_X_COORD,START_Y_COORD)
-        self.uavs = [Uav(self.start.copy(),UAV_BATTERY) for _ in range(UAV_AMOUNT)]
-        self.obstacles = [Obstacle(Coord(x,y)) for (x,y) in OBSTACLES_COORDS]
-        pois_times_and_coords = zip(POINTS_OF_INTEREST_VISIT_TIMES,POINTS_OF_INTEREST_COORDS)
+        env = Env.get_instance()
+        self.size = Coord(env.ENVIRONMENT_X_AXIS,env.ENVIRONMENT_Y_AXIS)
+        self.start = Coord(env.START_X_COORD,env.START_Y_COORD)
+        self.uavs = [Uav(self.start.copy(),env.UAV_BATTERY) for _ in range(env.UAV_AMOUNT)]
+        self.obstacles = [Obstacle(Coord(x,y)) for (x,y) in env.OBSTACLES_COORDS]
+        pois_times_and_coords = zip(env.POINTS_OF_INTEREST_VISIT_TIMES,env.POINTS_OF_INTEREST_COORDS)
         self.points_of_interest = [Point_Of_Interest(visit_time,Coord(x,y)) for visit_time,(x,y) in pois_times_and_coords]
         self.heuristic = Ardemisa()
-        self.total_time = TOTAL_TIME
+        self.total_time = env.TOTAL_TIME
         self.time_elapsed = 0
     
     @classmethod
@@ -70,5 +71,3 @@ class Environment:
             uav.position = self.start.copy()
             uav.charging = False
             uav.current_charge = 0
-         
-        

@@ -2,7 +2,7 @@ from .coord import Coord
 from ..utils.enums import Move
 from ..utils.constants import all_moves
 from ..utils.utilities import distance,move_delta,delta_to_move
-from env_parser import UAV_CHARGE_TIME
+from env_parser import Env
 
 class Uav:
     position:Coord
@@ -23,10 +23,11 @@ class Uav:
 
     def move(self,move:Move):
         from .environment import Environment
-        env = Environment.get_instance()
+        env = Env.get_instance()
+        environment = Environment.get_instance()
         if self.charging:
             self.current_charge += 1
-            if self.current_charge == UAV_CHARGE_TIME:
+            if self.current_charge == env.UAV_CHARGE_TIME:
                 self.charging = False
                 self.current_charge = 0
                 self.battery = self.max_battery
@@ -35,7 +36,7 @@ class Uav:
         delta = move_delta(actual_move)
         self.position.apply_delta(delta)
         self.battery -= 1
-        if (self.position == env.start) and (self.get_effective_battery() < 2):
+        if (self.position == environment.start) and (self.get_effective_battery() < 2):
             self.charging = True
         return self.position,actual_move
     
