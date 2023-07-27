@@ -1,8 +1,8 @@
-import torch
-import torch.nn as nn
+from torch import ones
+from torch.nn import BCELoss,Module
 from env_parser import Env
 
-class CustomLoss(nn.Module):
+class CustomLoss(Module):
 
     def __init__(self, evaluations, eval_weight, regular_weight):
         super(CustomLoss, self).__init__()
@@ -19,8 +19,8 @@ class CustomLoss(nn.Module):
 
     def forward(self, predictions, targets):
         env = Env.get_instance()
-        reg = self.regular_weight * nn.BCELoss()(predictions, targets)
-        evaluation = self.eval_weight * nn.BCELoss()(self.evaluations,
-                                                    torch.ones(self.evaluations.size(0)).to(env.DEVICE))
+        loss_fun = BCELoss()
+        reg = self.regular_weight * loss_fun(predictions, targets)
+        evaluation = self.eval_weight * loss_fun(self.evaluations,ones(self.evaluations.size(0)).to(env.DEVICE))
         total = reg + evaluation
         return total

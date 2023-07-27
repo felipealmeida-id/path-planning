@@ -8,7 +8,7 @@ from .utils import label_fake, label_real
 
 class Discriminator(Module):
     loss_function:_Loss = BCELoss()
-    optimizer:Adam
+    optimizer:Optimizer
 
     def __init__(self):
         env = Env.get_instance()

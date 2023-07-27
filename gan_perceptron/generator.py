@@ -9,13 +9,13 @@ from .utils import label_real
 
 
 class Generator(Module):
-    optimizer:Adam
+    optimizer:Optimizer
     loss_fun:CustomLoss = CustomLoss(empty(1),0,0)
     
-    def __init__(self, noise_dim):
+    def __init__(self):
         env = Env.get_instance()
         super(Generator, self).__init__()
-        self.noise_dim = noise_dim
+        self.noise_dim = env.NOISE_DIMENSION
         self.main = Sequential(
             Linear(self.noise_dim, 256),
             LeakyReLU(0.2),
@@ -29,9 +29,10 @@ class Generator(Module):
         self.optimizer = Adam(self.parameters(),lr=env.G_LEARN_RATE)
 
     def forward(self, x):
+        env = Env.get_instance()
         return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME)
 
-    def custom_train(self,discriminator: Discriminator, data_fake, eval_tensor, epoch):
+    def custom_train(self,discriminator: Discriminator, data_fake, eval_tensor, epoch:int):
         env = Env.get_instance()
         curr_batch_size = data_fake.size(0)
         real_label = label_real(curr_batch_size)
