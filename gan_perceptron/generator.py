@@ -1,14 +1,19 @@
+from torch import empty
 from torch.nn import Module, Linear, Sequential, Tanh, LeakyReLU
-from torch.optim import Optimizer
+from torch.optim import Optimizer,Adam
 
-from env_parser import EPOCHS,TOTAL_TIME,UAV_AMOUNT
-from discriminator import Discriminator
-from custom_loss import CustomLoss
-from utils import label_real
+from env_parser import Env
+from .discriminator import Discriminator
+from .custom_loss import CustomLoss
+from .utils import label_real
 
 
 class Generator(Module):
+    optimizer:Adam
+    loss_fun:CustomLoss = CustomLoss(empty(1),0,0)
+    
     def __init__(self, noise_dim):
+        env = Env.get_instance()
         super(Generator, self).__init__()
         self.noise_dim = noise_dim
         self.main = Sequential(
@@ -18,23 +23,25 @@ class Generator(Module):
             LeakyReLU(0.2),
             Linear(512, 1024),
             LeakyReLU(0.2),
-            Linear(1024, UAV_AMOUNT * TOTAL_TIME),
+            Linear(1024, env.UAV_AMOUNT * env.TOTAL_TIME),
             Tanh(),
         )
+        self.optimizer = Adam(self.parameters(),lr=env.G_LEARN_RATE)
 
     def forward(self, x):
-        return self.main(x).view(-1, UAV_AMOUNT, TOTAL_TIME)
+        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME)
 
-
-def train_generator(discriminator: Discriminator, g_optimizer: Optimizer, data_fake, eval_tensor, epoch):
-    curr_batch_size = data_fake.size(0)
-    real_label = label_real(curr_batch_size)
-    g_optimizer.zero_grad()
-    output = discriminator(data_fake)
-    evalWeight = epoch/EPOCHS
-    regularWeight = (EPOCHS-epoch)/EPOCHS
-    loss_fun = CustomLoss(eval_tensor, evalWeight, regularWeight)
-    loss = loss_fun(output, real_label)
-    loss.backward()
-    g_optimizer.step()
-    return loss
+    def custom_train(self,discriminator: Discriminator, data_fake, eval_tensor, epoch):
+        env = Env.get_instance()
+        curr_batch_size = data_fake.size(0)
+        real_label = label_real(curr_batch_size)
+        self.optimizer.zero_grad()
+        output = discriminator(data_fake)
+        eval_weight = epoch/env.EPOCHS
+        regular_weight = (env.EPOCHS-epoch)/env.EPOCHS
+        self.loss_fun.adjust_weights(eval_weight,regular_weight)
+        self.loss_fun.set_evaluations(eval_tensor)
+        loss = self.loss_fun(output, real_label)
+        loss.backward()
+        self.optimizer.step()
+        return loss

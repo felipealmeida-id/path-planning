@@ -2,18 +2,20 @@ from os import listdir
 from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor
 from torch.utils.data import DataLoader, TensorDataset
 
-from env_parser import DEVICE,BATCH_SIZE
+from env_parser import Env
 
 def label_real(size:int):
-  return torchOnes(size,1).to(DEVICE)
+  env = Env.get_instance()
+  return torchOnes(size,1).to(env.DEVICE)
 
 def label_fake(size:int):
-  return torchZeros(size,1).to(DEVICE)
+  return torchZeros(size,1).to(env.DEVICE)
 
 def create_noise(size:int,nz:int):
-  return randn(size,nz).to(DEVICE)
+  return randn(size,nz).to(env.DEVICE)
 
 def load_dataset():
+  env = Env.get_instance()
   subdirs = listdir('./input')
   all_file_routes:list[list[list[float]]] = []
   for i in subdirs:
@@ -24,10 +26,10 @@ def load_dataset():
       file.close()
       file_routes = list(map(lambda x : list(map(float, x.split(' '))),file_lines))
       all_file_routes.append(file_routes)
-  files_tensor_routes = (tensor(all_file_routes,dtype=float32) / 4 - 1).to(DEVICE)
-  _labels = torchZeros(len(files_tensor_routes)).to(DEVICE)
+  files_tensor_routes = (tensor(all_file_routes,dtype=float32) / 4 - 1).to(env.DEVICE)
+  _labels = torchZeros(len(files_tensor_routes)).to(env.DEVICE)
   files_dataset = TensorDataset(files_tensor_routes,_labels)
-  route_loader = DataLoader(files_dataset,batch_size=BATCH_SIZE,shuffle=True)
+  route_loader = DataLoader(files_dataset,batch_size=env.BATCH_SIZE,shuffle=True)
   tensor_shape = files_tensor_routes.shape
   return route_loader, tensor_shape
 
