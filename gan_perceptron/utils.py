@@ -49,6 +49,12 @@ def tensor_to_file(tensor_routes:Tensor,file_name:str):
             file.write('\n')
         file.close()
 
-def save_progress(g_losses,d_losses,path,epoch):
-    
-    pass
+def save_progress(g_losses:list[float],d_losses:list[float],eval_avgs:list[float],epoch:int,path:str):
+    with open(path,'a') as file:
+        for i,(g_loss,d_loss,eval_avg) in enumerate(zip(g_losses,d_losses,eval_avgs)):
+            line = f"Epoch: {epoch+i} eval: {eval_avg} g_loss: {g_loss} d_loss: {d_loss}\n"
+            file.write(line)
+        file.close()
+    g_losses.clear()
+    d_losses.clear()
+    eval_avgs.clear()
