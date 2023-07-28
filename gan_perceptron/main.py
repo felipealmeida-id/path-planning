@@ -1,5 +1,4 @@
-from torch import FloatTensor,Module,save
-# from time import time
+from torch import FloatTensor,save
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
@@ -19,11 +18,11 @@ def gan_perceptron():
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)
         if epoch % 32 == 31:
-            save(discriminator.state_dict(),)
-            save(generator.state_dict(),)
+            save(discriminator.state_dict(),f"./output/{env.PY_ENV}/discriminator/d_{epoch}")
+            save(generator.state_dict(),f"./output/{env.PY_ENV}/generator/g_{epoch}")
             save_progress(epoch_g_losses,epoch_d_losses,epoch_eval_avg,epoch)
 
-def train_epoch(epoch,route_loader,discriminator:Module,generator:Module):
+def train_epoch(epoch,route_loader,discriminator,generator):
     from .utils import create_noise,output_to_moves
     env = Env.get_instance()
     for _, (images, _) in enumerate(route_loader):

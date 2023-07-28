@@ -4,7 +4,7 @@ import os
 from torch import manual_seed
 from pather.main import pather
 from gan_perceptron.main import gan_perceptron
-from env_parser import Env
+from utilities import prepare_directory
 # Initialize specific environment
 os.environ['PY_ENV'] = sys.argv[1]
 random.seed(2023)
@@ -19,7 +19,7 @@ switch_dict = {
 
 if module in switch_dict:
     os.environ['MODULE'] = module
-    env = Env.get_instance()
+    prepare_directory()
     switch_dict[module]()
 else:
     print(f"Invalid command \"{module}\"")

@@ -1,6 +1,7 @@
 from ..classes.coord import Coord
 from .enums import Move
 from env_parser import Env
+from os import makedirs
 
 def delta_to_move(coord:Coord) -> Move:
     if coord.x > 0:
@@ -73,7 +74,7 @@ def check_parameters(kwargs:dict[str,any],params:list[str]):
 
 def save_to_output(moves:dict[int,list[Move]],id:str):
     env = Env.get_instance()
-    with open(f'./pather/output/output.{env.PY_ENV}.{id}.txt',"w") as file:
+    with open(f'./output/{env.PY_ENV}/pather/generated_paths/path.{id}.txt',"w") as file:
         lines_to_write = []
         for moves in moves.values():
             moves_as_nums = ' '.join(list(map(lambda move:str(move.value),moves)))
