@@ -1,5 +1,5 @@
 from ..classes.coord import Coord
-from .enums import Move
+from enums import Move
 from env_parser import Env
 from os import makedirs
 

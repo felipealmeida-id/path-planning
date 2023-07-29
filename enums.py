@@ -12,7 +12,6 @@ class Move(Enum):
     DIAG_UP_RIGHT = 8
     
     def __repr__(self):
-        # return self.name
         if self.name == 'STAY':
             return 'o'
         if self.name == 'RIGHT':
@@ -32,3 +31,24 @@ class Move(Enum):
         if self.name == 'DIAG_UP_RIGHT':
             return '⇗'
         raise ValueError(f"{self.name} is invalid Move")
+
+class EvaluatorModules(Enum):
+    COVERAGE = "Coverage"
+    COLLISION = "Collision"
+    OBSTACLES = "Obstacles"
+    POIS = "POIS"
+    UPTIME = "Uptime"
+    OUTOFBOUND = "OutOfBound"
+    BATTERY = "Battery"
+
+    def __repr__(self):
+        return self.value
+
+class ProgramModules(Enum):
+    EVALUATOR   = 'eval'
+    PERCEPTRON  = 'gan'
+    PATHER      = 'path'
+    DRAWER      = 'draw'
+    
+    def __repr__(self):
+        return self.value

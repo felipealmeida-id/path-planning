@@ -2,7 +2,7 @@ from random import choice
 from .heuristic import MoveHeuristic
 from .uav import Uav
 from .point_of_interest import Point_Of_Interest
-from ..utils.enums import Move
+from enums import Move
 from ..utils.constants import ardemisa_move_params
 from ..utils.utilities import check_parameters,delta_to_move,move_delta
 

@@ -1,5 +1,5 @@
 from .coord import Coord
-from ..utils.enums import Move
+from enums import Move
 from ..utils.constants import all_moves
 from ..utils.utilities import distance,move_delta,delta_to_move
 from env_parser import Env
