@@ -18,7 +18,7 @@ class Uav:
         self.max_battery = battery
         self.charging = False
         self.current_charge = 0
-        self.inbound_evaluation = 0
+        self.inbound_evaluation = 1
 
     def get_effective_battery(self):
         return 0 if self.charging else (self.battery - self.distance_to_base())
