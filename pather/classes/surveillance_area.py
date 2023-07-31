@@ -7,7 +7,7 @@ from .point_of_interest import Point_Of_Interest
 from enums import Move
 from env_parser import Env
 
-class Environment:
+class SurveillanceArea:
     __instance = None
     obstacles:list[Obstacle]
     uavs:list[Uav]
@@ -31,7 +31,7 @@ class Environment:
     @classmethod
     def get_instance(cls):
         if not cls.__instance:
-            cls.__instance = Environment()
+            cls.__instance = SurveillanceArea()
         return cls.__instance
     
     def is_inbound(self,coord:Coord):

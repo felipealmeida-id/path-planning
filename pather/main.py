@@ -1,9 +1,9 @@
 def pather():
-    from pather.classes.environment import Environment
+    from pather.classes.surveillance_area import SurveillanceArea
     from env_parser import Env
     env = Env.get_instance()
     all_moves = {uav_index: [] for uav_index in range(env.UAV_AMOUNT)}
-    environment = Environment.get_instance()
+    environment = SurveillanceArea.get_instance()
     for _ in range(env.TOTAL_TIME):
         moves = environment.iterate()
         for uav_index,move in moves.items():

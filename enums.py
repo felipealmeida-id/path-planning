@@ -49,6 +49,9 @@ class ProgramModules(Enum):
     PERCEPTRON  = 'gan'
     PATHER      = 'path'
     DRAWER      = 'draw'
-    
+
+    def __str__(self):
+        return self.value
+
     def __repr__(self):
         return self.value

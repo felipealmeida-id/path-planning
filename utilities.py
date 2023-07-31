@@ -31,3 +31,9 @@ def folders_exist(folders_path:str):
         if not path.exists(current_path) or not path.isdir(current_path):
             return False
     return True
+
+def find_enum_by_value(enum_cls, value):
+    for enum_member in enum_cls:
+        if enum_member.value == value:
+            return enum_member
+    raise ValueError(f"No enum member with value '{value}' found for class {enum_cls.__name__}.")

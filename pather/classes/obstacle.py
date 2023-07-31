@@ -21,9 +21,9 @@ class Obstacle:
     #     self.sections = self._to_sections()
 
     # def _to_sections(self):
-    #     from .environment import Environment
+    #     from .environment import SurveillanceArea
     #     sections = []
-    #     env = Environment.get_instance()
+    #     env = SurveillanceArea.get_instance()
     #     percentageOfSectionInitX = env.size.x * self.dimsInit.x
     #     percentageOfSectionEndX = env.size.x * self.dimsEnd.x
     #     percentageOfSectionInitY = env.size.y * self.dimsInit.y

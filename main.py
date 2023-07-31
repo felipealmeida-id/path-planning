@@ -4,7 +4,7 @@ import os
 from torch import manual_seed
 from pather.main import pather
 from gan_perceptron.main import gan_perceptron
-from utilities import prepare_directory
+from utilities import prepare_directory,find_enum_by_value
 from enums import ProgramModules
 # Initialize specific environment
 os.environ['PY_ENV'] = sys.argv[1]
@@ -19,11 +19,7 @@ switch_dict = {
     ProgramModules.EVALUATOR:"",
     ProgramModules.DRAWER:""
 }
-
-if module in switch_dict:
-    os.environ['MODULE'] = module
-    prepare_directory()
-    switch_dict[module]()
-else:
-    print(f"Invalid command \"{module}\"")
-    print(f'Valid commands are: {list(switch_dict.keys())}')
+module_enum = find_enum_by_value(ProgramModules,module)
+os.environ['MODULE'] = module
+prepare_directory()
+switch_dict[module_enum]()

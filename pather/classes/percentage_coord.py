@@ -8,8 +8,8 @@ class PercentageCoord:
         self.y = y
     
     def to_coord(self) -> Coord:
-        from pather.classes.environment import Environment
-        environment = Environment.get_instance()
+        from pather.classes.surveillance_area import SurveillanceArea
+        environment = SurveillanceArea.get_instance()
         x = round(self.x * environment.size.x)
         y = round(self.y * environment.size.y)
         return Coord(x,y)

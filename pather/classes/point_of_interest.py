@@ -5,13 +5,16 @@ class Point_Of_Interest:
     last_visit:int
     position:Coord
 
+    def visit(self,time:int):
+        self.last_visit = time
+
+    def evaluation_iteration(time:int) -> None:
+        pass
+
     def __init__(self,visit_time:int,position:Coord):
         self.last_visit = 0
         self.visit_time = visit_time
         self.position = position
-
-    def visit(self,time:int):
-        self.last_visit = time
 
     def __repr__(self):
         return f"POI at {self.position}"

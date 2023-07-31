@@ -4,6 +4,8 @@ from json import loads
 from os import getenv
 from os.path import exists as file_exists
 from torch import device,cuda
+from utilities import find_enum_by_value
+from enums import ProgramModules
 
 class Env:
     __instance = None
@@ -34,6 +36,7 @@ class Env:
         # Check which environment to load
         PY_ENV = getenv('PY_ENV')
         MODULE = getenv('MODULE')
+        module_enum = find_enum_by_value(ProgramModules,MODULE)
         if PY_ENV is None:
             raise ValueError('PY_ENV is not specified')
         if not file_exists(f"./envs/.env.{PY_ENV}"):
@@ -41,10 +44,10 @@ class Env:
         print(f"Loading .env.{PY_ENV}")
         load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
         switch_dict = {
-            "pather":self._parse_env_pather,
-            "gan":self._parse_env_gan
+            ProgramModules.PATHER:self._parse_env_pather,
+            ProgramModules.PERCEPTRON:self._parse_env_gan
         }
-        switch_dict[MODULE]()
+        switch_dict[module_enum]()
         self.BATCH_SIZE = int(getenv('BATCH_SIZE'))
         self.DEVICE = device('cuda' if cuda.is_available() else 'cpu')
         self.D_LEARN_RATE = float(getenv('D_LEARN_RATE'))
