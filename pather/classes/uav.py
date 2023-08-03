@@ -11,6 +11,7 @@ class Uav:
     max_battery:int
     charging:bool
     inbound_evaluation:float
+    battery_evaluation:float
 
     def __init__(self,start:Coord,battery:int):
         self.position = start

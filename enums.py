@@ -55,3 +55,12 @@ class ProgramModules(Enum):
 
     def __repr__(self):
         return self.value
+    
+class EvaluatorModules(Enum):
+    COVERAGE = "Coverage"
+    COLLISION = "Collision"
+    OBSTACLES = "Obstacles"
+    POIS = "POIS"
+    UPTIME = "Uptime"
+    OUTOFBOUND = "OutOfBound"
+    BATTERY = "Battery"

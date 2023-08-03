@@ -1,7 +1,7 @@
 from ..classes.coord import Coord
 from enums import Move
 from env_parser import Env
-from os import makedirs
+from .constants import delta_dict
 
 def delta_to_move(coord:Coord) -> Move:
     if coord.x > 0:
@@ -61,10 +61,8 @@ def y_delta(move: Move):
     else:
         return 0
 
-def move_delta(move:Move):
-    dx = x_delta(move)
-    dy = y_delta(move)
-    return dx , dy
+def move_delta(move:Move)->tuple[int,int]:
+    return delta_dict[move]
 
 def check_parameters(kwargs:dict[str,any],params:list[str]):
     for param in params:
