@@ -51,5 +51,5 @@ class Discriminator(Module):
         self.optimizer.step()
         return loss_real + loss_fake
 
-    def label_smoothing(target, smoothing=0.2):
+    def label_smoothing(self,target, smoothing=0.2):
         return target * (1 - smoothing) + 0.5 * smoothing

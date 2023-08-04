@@ -1,3 +1,5 @@
+from collections import Counter
+
 def prepare_directory():
     from env_parser import Env
     env = Env.get_instance()
@@ -37,3 +39,7 @@ def find_enum_by_value(enum_cls, value):
         if enum_member.value == value:
             return enum_member
     raise ValueError(f"No enum member with value '{value}' found for class {enum_cls.__name__}.")
+
+def get_duplicates(array):
+    c = Counter(array)
+    return {k: v for k, v in c.items() if v > 1}

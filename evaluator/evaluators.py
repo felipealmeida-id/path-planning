@@ -1,7 +1,8 @@
-from pather.classes import Coord
+from pather.classes.coord import Coord
 from enums import Move
+from utilities import get_duplicates
 
-def evaluateCoverageArea(area: list[list[list[int]]], _) -> float:
+def evaluate_coverage_area(area: list[list[list[int]]], _) -> float:
     from env_parser import Env
     env = Env.get_instance()
     numberOfSquares = env.ENVIRONMENT_X_AXIS * env.ENVIRONMENT_Y_AXIS
@@ -13,7 +14,7 @@ def evaluateCoverageArea(area: list[list[list[int]]], _) -> float:
     return res / numberOfSquares
 
 
-def evaluateDronesCollision(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
+def evaluate_drones_collision(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
     from env_parser import Env
     env = Env.get_instance()
     numberOfDrones = env.UAV_AMOUNT
@@ -43,43 +44,47 @@ def evaluateDronesCollision(area: list[list[list[int]]], actions: list[list[Move
 #     return 1 - timeOnObs / worstCase
 
 
-def evaluatePOICoverage(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
-    timeSpentNeedy = [0 for _ in constants.POIS]
-    lastVisit = [0 for _ in constants.POIS]
+def evaluate_POI_coverage(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
+    from pather.classes.surveillance_area import SurveillanceArea
+    from env_parser import Env
+    env = Env.get_instance()
+    surveillance_area = SurveillanceArea.get_instance()
+    timeSpentNeedy = [0 for _ in surveillance_area.points_of_interest]
+    lastVisit = [0 for _ in surveillance_area.points_of_interest]
     time = len(actions[0])
-    pois = [POI(coords, 0, 0) for coords in constants.POIS]
+    pois = surveillance_area.points_of_interest
     for t in range(time):
         for i, poi in enumerate(pois):
-            coords = poi.getSection(areaDims)
+            coords = poi.position
             x = coords.x
             y = coords.y
             if t in area[x][y]:  # type: ignore
                 lastVisit[i] = t
-            elif t - lastVisit[i] > constants.POIS_TIMES[i]:
+            elif t - lastVisit[i] > env.POINTS_OF_INTEREST_VISIT_TIMES[i]:
                 timeSpentNeedy[i] += 1
     totalTimeSpentNeedy = 0
     for needy in timeSpentNeedy:
         totalTimeSpentNeedy += needy
-    maxNeedyTimes = [time - poiTime for poiTime in constants.POIS_TIMES]
+    maxNeedyTimes = [time - poiTime for poiTime in env.POINTS_OF_INTEREST_VISIT_TIMES]
     maximumNeediness = 0
     for needy in maxNeedyTimes:
         maximumNeediness += needy
     return 1 - totalTimeSpentNeedy / maximumNeediness
 
 
-def evaluateDroneUpTime(
-    area: list[list[list[int]]], actions: list[list[Move]], areaDims: Coord
-) -> float:
+def evaluate_drone_up_time(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
+    from env_parser import Env
+    env = Env.get_instance()
     time = len(actions[0])
     dronesUp = 0
     breaked = False
     for t in range(time):
-        for i in range(int(areaDims.x)):
+        for i in range(env.ENVIRONMENT_X_AXIS):
             if breaked:
                 breaked = False
                 break
-            for j in range(int(areaDims.y)):
-                if i == constants.ORIGIN.x and j == constants.ORIGIN.y:
+            for j in range(env.ENVIRONMENT_Y_AXIS):
+                if i == env.START_X_COORD and j == env.START_Y_COORD:
                     continue
                 if t in area[i][j]:
                     dronesUp += 1

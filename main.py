@@ -3,7 +3,7 @@ import random
 import os
 from torch import manual_seed
 from pather.main import pather
-from gan_perceptron.main import gan_perceptron
+from gan_perceptron.main import gan_perceptron,profiler
 from utilities import prepare_directory,find_enum_by_value
 from enums import ProgramModules
 # Initialize specific environment
@@ -15,7 +15,7 @@ module = sys.argv[2]
 
 switch_dict = {
     ProgramModules.PATHER:pather,
-    ProgramModules.PERCEPTRON:gan_perceptron,
+    ProgramModules.PERCEPTRON:profiler,
     ProgramModules.EVALUATOR:"",
     ProgramModules.DRAWER:""
 }
