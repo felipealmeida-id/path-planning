@@ -5,18 +5,30 @@ def prepare_directory():
     env = Env.get_instance()
     root = f"./output/{env.PY_ENV}"
     required_folders = [
-        "gan/generator",
-        "gan/discriminator",
-        "gan/generated_imgs",
-        "pather/generated_paths"
+        f"./output/{env.PY_ENV}/gan/generator",
+        f"./output/{env.PY_ENV}/gan/discriminator",
+        f"./output/{env.PY_ENV}/gan/generated_imgs",
+        f"./output/{env.PY_ENV}/pather/generated_paths",
+        f"./inputs/{env.PY_ENV}/"
     ]
-    required_paths = map(lambda path: f"{root}/{path}",required_folders)
     delete_existing_results(root)
-    create_necessary_folders(required_paths)
+    create_necessary_folders(required_folders)
+    unzip_inputs()
+
+def unzip_inputs():
+    from zipfile import ZipFile
+    from os import listdir 
+    from env_parser import Env
+    env = Env.get_instance()
+    if len(listdir(f'inputs/{env.PY_ENV}')) == 0:
+        with ZipFile(f'./zip_inputs/{env.PY_ENV}.zip','r') as zip_ref:
+            zip_ref.extractall(f'inputs/{env.PY_ENV}')
 
 def delete_existing_results(root:str):
     from shutil import rmtree
-    rmtree(root)
+    from os.path import exists
+    if exists(root):
+        rmtree(root)
 
 def create_necessary_folders(required_paths):
     from os import makedirs
