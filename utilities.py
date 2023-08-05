@@ -20,9 +20,9 @@ def unzip_inputs():
     from os import listdir 
     from env_parser import Env
     env = Env.get_instance()
-    if len(listdir(f'inputs/{env.PY_ENV}')) == 0:
-        with ZipFile(f'./zip_inputs/{env.PY_ENV}.zip','r') as zip_ref:
-            zip_ref.extractall(f'inputs/{env.PY_ENV}')
+    if len(listdir(f'inputs/{env.DATASET}')) == 0:
+        with ZipFile(f'./zip_inputs/{env.DATASET}.zip','r') as zip_ref:
+            zip_ref.extractall(f'inputs/{env.DATASET}')
 
 def delete_existing_results(root:str):
     from shutil import rmtree
