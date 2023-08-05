@@ -71,23 +71,15 @@ def evaluate_POI_coverage(area: list[list[list[int]]], actions: list[list[Move]]
         maximumNeediness += needy
     return 1 - totalTimeSpentNeedy / maximumNeediness
 
-
-def evaluate_drone_up_time(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
+# Out of scope
+def evaluate_drone_up_time(area: list[list[list[int]]], _: list[list['Move']]) -> float:
     from env_parser import Env
     env = Env.get_instance()
-    time = len(actions[0])
     dronesUp = 0
-    breaked = False
-    for t in range(time):
-        for i in range(env.ENVIRONMENT_X_AXIS):
-            if breaked:
-                breaked = False
-                break
-            for j in range(env.ENVIRONMENT_Y_AXIS):
-                if i == env.START_X_COORD and j == env.START_Y_COORD:
-                    continue
-                if t in area[i][j]:
-                    dronesUp += 1
-                    breaked = True
-                    break
-    return dronesUp / time
+
+    # Directly check if there's a drone up at the start coordinates for each time t
+    for t in range(env.TOTAL_TIME):
+        if t in area[env.START_X_COORD][env.START_Y_COORD]:
+            dronesUp += 1
+
+    return dronesUp / env.TOTAL_TIME

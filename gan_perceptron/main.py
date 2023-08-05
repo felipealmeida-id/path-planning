@@ -3,6 +3,7 @@ from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
 from evaluator.main import evaluateGAN
+from time import time
 import cProfile
 import pstats
 import csv
@@ -17,10 +18,13 @@ def gan_perceptron():
     discriminator = Discriminator().to(env.DEVICE)
     generator = Generator().to(env.DEVICE)
     for epoch in range(env.EPOCHS):
+        start = time()
         d_loss,g_loss,eval_avg = train_epoch(epoch,route_loader,discriminator,generator)
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)
+        end = time()
+        print(f"{end-start}s")
         if epoch % 32 == 31:
             save(discriminator.state_dict(),f"./output/{env.PY_ENV}/discriminator/d_{epoch}")
             save(generator.state_dict(),f"./output/{env.PY_ENV}/generator/g_{epoch}")

@@ -6,7 +6,7 @@ def evaluateGAN(generatedList: list[list[int]], activeModules: list[EvaluatorMod
     return _evaluate(parsedList, activeModules)
 
 def _evaluate(grid: list[list[Move]], activeModules: list[EvaluatorModules] | None = None):
-    from evaluator.evaluators import evaluate_coverage_area,evaluate_drone_up_time,evaluate_POI_coverage,evaluate_drones_collision
+    from evaluator.evaluators import evaluate_coverage_area,evaluate_POI_coverage,evaluate_drones_collision,evaluate_drone_up_time
     area, oob_dist, oob_time, batteryEvaluation = populate_area(grid)
     if activeModules is None:
         evaluators = {
@@ -27,8 +27,8 @@ def _evaluate(grid: list[list[Move]], activeModules: list[EvaluatorModules] | No
             # evaluators["Obstacles"] = evaluateObstacles
         if EvaluatorModules.POIS in activeModules:
             evaluators["POIS"] = evaluate_POI_coverage
-        if EvaluatorModules.UPTIME in activeModules:
-            evaluators["Uptime"] = evaluate_drone_up_time
+        # if EvaluatorModules.UPTIME in activeModules:
+        #     evaluators["Uptime"] = evaluate_drone_up_time
         if EvaluatorModules.OUTOFBOUND in activeModules:
             evaluators["OutOfBound"] = (
                 lambda _, __, ___: ((oob_dist + oob_time) / 2) ** 2

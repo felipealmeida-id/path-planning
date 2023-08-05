@@ -18,15 +18,15 @@ def create_noise(size:int):
 
 def load_dataset():
     env = Env.get_instance()
-    root = f'./inputs/{env.PY_ENV}'
+    root = f'./inputs/{env.PY_ENV}/input'
     if not path.exists(root):
         raise AssertionError('Input directory should exist')
-    subdirs = listdir('./input')
+    subdirs = listdir(root)
     all_file_routes:list[list[list[float]]] = []
     for i in subdirs:
-        files = listdir(f"./input/{i}")
+        files = listdir(f"{root}/{i}")
         for j in files:
-            file = open(f"./input/{i}/{j}",'r')
+            file = open(f"{root}/{i}/{j}",'r')
             file_lines = file.readlines()
             file.close()
             file_routes = list(map(lambda x : list(map(float, x.split(' '))),file_lines))
