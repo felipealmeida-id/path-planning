@@ -31,6 +31,7 @@ class Env:
     UAV_AMOUNT:int
     UAV_BATTERY:int
     UAV_CHARGE_TIME:int
+    DATASET:str
 
     def __init__(self):
         # Check which environment to load
@@ -70,6 +71,7 @@ class Env:
         self.UAV_AMOUNT = int(getenv('UAV_AMOUNT'))
         self.UAV_BATTERY = int(getenv('UAV_BATTERY'))
         self.UAV_CHARGE_TIME = int(getenv('UAV_CHARGE_TIME'))
+        self.DATASET = getenv('DATASET')
 
     @classmethod
     def get_instance(self):
