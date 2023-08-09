@@ -50,15 +50,15 @@ def train_epoch(epoch, route_loader, discriminator, generator):
             # data_fake are 30x30 images
             data_fake = generator(create_noise(curr_batch_size))
             data_real = images
-            downscaled_data_fake = list(
+            downscaled_data_fake = (FloatTensor(list(
                 map(downscale, (output_to_moves(data_fake).tolist()))
-            )
+            ))/4-1).to(env.DEVICE)
             d_loss = discriminator.custom_train(data_real, downscaled_data_fake)
         # data_fake are 30x30 images
         data_fake = generator(create_noise(curr_batch_size))
         move_list = output_to_moves(data_fake).tolist()
-        downscaled_data_fake = list(map(downscale, move_list))
         evaluations = list(map(evaluateGAN, move_list))
+        downscaled_data_fake = (FloatTensor(list(map(downscale, move_list)))/4-1).to(env.DEVICE)
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         g_loss = generator.custom_train(
             discriminator, downscaled_data_fake, eval_tensor, epoch

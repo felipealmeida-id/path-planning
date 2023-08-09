@@ -14,6 +14,8 @@ class Env:
     D_LEARN_RATE:float
     ENVIRONMENT_X_AXIS:int
     ENVIRONMENT_Y_AXIS:int
+    HR_ENVIRONMENT_X_AXIS:int
+    HR_ENVIRONMENT_Y_AXIS:int
     EPOCHS:int
     G_LEARN_RATE:float
     INITIAL_TURN_ON_PROBABILITY:int
@@ -22,15 +24,20 @@ class Env:
     OBSTACLES_COORDS:list
     POINTS_OF_INTEREST_COORDS:list
     POINTS_OF_INTEREST_VISIT_TIMES:list[int]
+    HR_POINTS_OF_INTEREST_COORDS:list
+    HR_POINTS_OF_INTEREST_VISIT_TIMES:list[int]
     PY_ENV:str
     SAMPLE_SIZE:int
     SAMPLES_TO_GENERATE:int
     START_X_COORD:int
     START_Y_COORD:int
     TOTAL_TIME:int
+    HR_TOTAL_TIME:int
     UAV_AMOUNT:int
     UAV_BATTERY:int
     UAV_CHARGE_TIME:int
+    HR_UAV_BATTERY:int
+    HR_UAV_CHARGE_TIME:int
     DATASET:str
 
     def __init__(self):
@@ -54,6 +61,8 @@ class Env:
         self.D_LEARN_RATE = float(getenv('D_LEARN_RATE'))
         self.ENVIRONMENT_X_AXIS = int(getenv('ENVIRONMENT_X_AXIS'))
         self.ENVIRONMENT_Y_AXIS = int(getenv('ENVIRONMENT_Y_AXIS'))
+        self.HR_ENVIRONMENT_X_AXIS = int(getenv('HR_ENVIRONMENT_X_AXIS'))
+        self.HR_ENVIRONMENT_Y_AXIS = int(getenv('HR_ENVIRONMENT_Y_AXIS'))
         self.EPOCHS = int(getenv('EPOCHS'))
         self.G_LEARN_RATE = float(getenv('G_LEARN_RATE'))
         self.INITIAL_TURN_ON_PROBABILITY = int(getenv('INITIAL_TURN_ON_PROBABILITY'))
@@ -62,15 +71,20 @@ class Env:
         self.OBSTACLES_COORDS = self._parse_coord_list(getenv('OBSTACLES_COORDS'))
         self.POINTS_OF_INTEREST_COORDS = self._parse_coord_list(getenv('POINTS_OF_INTEREST_COORDS'))
         self.POINTS_OF_INTEREST_VISIT_TIMES = self._parse_num_list(getenv('POINTS_OF_INTEREST_VISIT_TIMES'))
+        self.HR_POINTS_OF_INTEREST_COORDS = self._parse_coord_list(getenv('HR_POINTS_OF_INTEREST_COORDS'))
+        self.HR_POINTS_OF_INTEREST_VISIT_TIMES = self._parse_num_list(getenv('HR_POINTS_OF_INTEREST_VISIT_TIMES'))
         self.PY_ENV = PY_ENV
         self.SAMPLE_SIZE = int(getenv('SAMPLE_SIZE'))
         self.SAMPLES_TO_GENERATE = int(getenv('SAMPLES_TO_GENERATE'))
         self.START_X_COORD = int(getenv('START_X_COORD'))
         self.START_Y_COORD = int(getenv('START_Y_COORD'))
         self.TOTAL_TIME = int(getenv('TOTAL_TIME'))
+        self.HR_TOTAL_TIME = int(getenv('HR_TOTAL_TIME'))
         self.UAV_AMOUNT = int(getenv('UAV_AMOUNT'))
         self.UAV_BATTERY = int(getenv('UAV_BATTERY'))
         self.UAV_CHARGE_TIME = int(getenv('UAV_CHARGE_TIME'))
+        self.HR_UAV_BATTERY = int(getenv('HR_UAV_BATTERY'))
+        self.HR_UAV_CHARGE_TIME = int(getenv('HR_UAV_CHARGE_TIME'))
         self.DATASET = getenv('DATASET')
 
     @classmethod

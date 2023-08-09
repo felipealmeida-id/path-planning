@@ -23,14 +23,14 @@ class Generator(Module):
             LeakyReLU(0.2),
             Linear(512, 1024),
             LeakyReLU(0.2),
-            Linear(1024, env.UAV_AMOUNT * env.TOTAL_TIME),
+            Linear(1024, env.UAV_AMOUNT * (env.TOTAL_TIME*2)),
             Tanh(),
         )
         self.optimizer = Adam(self.parameters(),lr=env.G_LEARN_RATE)
 
     def forward(self, x):
         env = Env.get_instance()
-        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME)
+        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME*2)
 
     def custom_train(self,discriminator: Discriminator, data_fake, eval_tensor, epoch:int):
         env = Env.get_instance()

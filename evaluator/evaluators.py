@@ -5,10 +5,10 @@ from utilities import get_duplicates
 def evaluate_coverage_area(area: list[list[list[int]]], _) -> float:
     from env_parser import Env
     env = Env.get_instance()
-    numberOfSquares = env.ENVIRONMENT_X_AXIS * env.ENVIRONMENT_Y_AXIS
+    numberOfSquares = env.HR_ENVIRONMENT_X_AXIS * env.HR_ENVIRONMENT_Y_AXIS
     res = numberOfSquares
-    for i in range(env.ENVIRONMENT_X_AXIS):
-        for j in range(env.ENVIRONMENT_Y_AXIS):
+    for i in range(env.HR_ENVIRONMENT_X_AXIS):
+        for j in range(env.HR_ENVIRONMENT_Y_AXIS):
             if len(area[i][j]) == 0:
                 res = res - 1
     return res / numberOfSquares
@@ -18,11 +18,11 @@ def evaluate_drones_collision(area: list[list[list[int]]], actions: list[list[Mo
     from env_parser import Env
     env = Env.get_instance()
     numberOfDrones = env.UAV_AMOUNT
-    numberOfTimes = env.TOTAL_TIME
+    numberOfTimes = env.HR_TOTAL_TIME
     worstCase = numberOfDrones * numberOfTimes
     res = 0
-    for i in range(env.ENVIRONMENT_X_AXIS):
-        for j in range(env.ENVIRONMENT_Y_AXIS):
+    for i in range(env.HR_ENVIRONMENT_X_AXIS):
+        for j in range(env.HR_ENVIRONMENT_Y_AXIS):
             if i == env.START_X_COORD and j == env.START_Y_COORD:
                 continue
             duplicates = get_duplicates(area[i][j])
@@ -60,12 +60,12 @@ def evaluate_POI_coverage(area: list[list[list[int]]], actions: list[list[Move]]
             y = coords.y
             if t in area[x][y]:  # type: ignore
                 lastVisit[i] = t
-            elif t - lastVisit[i] > env.POINTS_OF_INTEREST_VISIT_TIMES[i]:
+            elif t - lastVisit[i] > env.HR_POINTS_OF_INTEREST_VISIT_TIMES[i]:
                 timeSpentNeedy[i] += 1
     totalTimeSpentNeedy = 0
     for needy in timeSpentNeedy:
         totalTimeSpentNeedy += needy
-    maxNeedyTimes = [time - poiTime for poiTime in env.POINTS_OF_INTEREST_VISIT_TIMES]
+    maxNeedyTimes = [time - poiTime for poiTime in env.HR_POINTS_OF_INTEREST_VISIT_TIMES]
     maximumNeediness = 0
     for needy in maxNeedyTimes:
         maximumNeediness += needy
@@ -78,8 +78,8 @@ def evaluate_drone_up_time(area: list[list[list[int]]], _: list[list['Move']]) -
     dronesUp = 0
 
     # Directly check if there's a drone up at the start coordinates for each time t
-    for t in range(env.TOTAL_TIME):
+    for t in range(env.HR_TOTAL_TIME):
         if t in area[env.START_X_COORD][env.START_Y_COORD]:
             dronesUp += 1
 
-    return dronesUp / env.TOTAL_TIME
+    return dronesUp / env.HR_TOTAL_TIME
