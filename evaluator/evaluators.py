@@ -1,9 +1,9 @@
-from pather.classes.coord import Coord
 from enums import Move
 from utilities import get_duplicates
 
-def evaluate_coverage_area(area: list[list[list[int]]], _) -> float:
+def evaluate_coverage_area(*args) -> float:
     from env_parser import Env
+    area:list[list[list[int]]] = args[0]
     env = Env.get_instance()
     numberOfSquares = env.HR_ENVIRONMENT_X_AXIS * env.HR_ENVIRONMENT_Y_AXIS
     res = numberOfSquares
@@ -14,8 +14,9 @@ def evaluate_coverage_area(area: list[list[list[int]]], _) -> float:
     return res / numberOfSquares
 
 
-def evaluate_drones_collision(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
+def evaluate_drones_collision(*args) -> float:
     from env_parser import Env
+    area:list[list[list[int]]] = args[0]
     env = Env.get_instance()
     numberOfDrones = env.UAV_AMOUNT
     numberOfTimes = env.HR_TOTAL_TIME
@@ -30,23 +31,11 @@ def evaluate_drones_collision(area: list[list[list[int]]], actions: list[list[Mo
                 res = res + duplicates[k]
     return 1 - (res / worstCase)
 
-
-# def evaluateObstacles(area: list[list[list[int]]], actions: list[list[Move]], _) -> float:
-#     numberOfDrones = len(actions)
-#     numberOfTimes = len(actions[0])
-#     worstCase = numberOfDrones * numberOfTimes
-#     flat_obs = constants.FLAT_OBSTACLES
-#     timeOnObs = 0
-#     for obs in flat_obs:
-#         x = obs.x
-#         y = obs.y
-#         timeOnObs += len(area[x][y])  # type: ignore
-#     return 1 - timeOnObs / worstCase
-
-
-def evaluate_POI_coverage(area: list[list[list[int]]], actions: list[list[Move]]) -> float:
+def evaluate_POI_coverage(*args) -> float:
     from pather.classes.surveillance_area import SurveillanceArea
     from env_parser import Env
+    area: list[list[list[int]]] = args[0]
+    actions: list[list[Move]] = args[1]
     env = Env.get_instance()
     surveillance_area = SurveillanceArea.get_instance()
     timeSpentNeedy = [0 for _ in surveillance_area.points_of_interest]
@@ -72,14 +61,27 @@ def evaluate_POI_coverage(area: list[list[list[int]]], actions: list[list[Move]]
     return 1 - totalTimeSpentNeedy / maximumNeediness
 
 # Out of scope
-def evaluate_drone_up_time(area: list[list[list[int]]], _: list[list['Move']]) -> float:
+def evaluate_drone_up_time(*args) -> float:
     from env_parser import Env
+    area: list[list[list[int]]] = args[0]
     env = Env.get_instance()
     dronesUp = 0
-
-    # Directly check if there's a drone up at the start coordinates for each time t
     for t in range(env.HR_TOTAL_TIME):
         if t in area[env.START_X_COORD][env.START_Y_COORD]:
             dronesUp += 1
-
     return dronesUp / env.HR_TOTAL_TIME
+
+# Out of scope Probably
+def evaluateObstacles(*args) -> float:
+    area: list[list[list[int]]] = args[0]
+    actions: list[list[Move]] = args[1]
+    numberOfDrones = len(actions)
+    numberOfTimes = len(actions[0])
+    worstCase = numberOfDrones * numberOfTimes
+    flat_obs = constants.FLAT_OBSTACLES
+    timeOnObs = 0
+    for obs in flat_obs:
+        x = obs.x
+        y = obs.y
+        timeOnObs += len(area[x][y])
+    return 1 - timeOnObs / worstCase

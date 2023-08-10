@@ -9,7 +9,8 @@ def prepare_directory():
         f"./output/{env.PY_ENV}/gan/discriminator",
         f"./output/{env.PY_ENV}/gan/generated_imgs",
         f"./output/{env.PY_ENV}/pather/generated_paths",
-        f"./inputs/{env.PY_ENV}/"
+        f"./inputs/{env.PY_ENV}/",
+        f"./output/profiling/{env.PY_ENV}"
     ]
     delete_existing_results(root)
     create_necessary_folders(required_folders)

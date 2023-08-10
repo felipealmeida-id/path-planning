@@ -2,12 +2,9 @@ from torch import FloatTensor, save
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
-from downscaler.downscaler import downscale_trajectory as downscale
+from downscaler.downscaler import Downscaler
 from evaluator.main import evaluateGAN
 from time import time
-import cProfile
-import pstats
-import csv
 
 
 def gan_perceptron():
@@ -20,10 +17,11 @@ def gan_perceptron():
     epoch_eval_avg = []
     discriminator = Discriminator().to(env.DEVICE)
     generator = Generator().to(env.DEVICE)
+    downscaler = Downscaler()
     for epoch in range(env.EPOCHS):
         start = time()
         d_loss, g_loss, eval_avg = train_epoch(
-            epoch, route_loader, discriminator, generator
+            epoch, route_loader, discriminator, generator,downscaler
         )
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
@@ -39,7 +37,7 @@ def gan_perceptron():
             save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
 
 
-def train_epoch(epoch, route_loader, discriminator, generator):
+def train_epoch(epoch, route_loader, discriminator, generator,downscaler:Downscaler):
     from .utils import create_noise, output_to_moves
 
     env = Env.get_instance()
@@ -51,14 +49,14 @@ def train_epoch(epoch, route_loader, discriminator, generator):
             data_fake = generator(create_noise(curr_batch_size))
             data_real = images
             downscaled_data_fake = (FloatTensor(list(
-                map(downscale, (output_to_moves(data_fake).tolist()))
+                map(downscaler.downscale_trajectory, (output_to_moves(data_fake).tolist()))
             ))/4-1).to(env.DEVICE)
             d_loss = discriminator.custom_train(data_real, downscaled_data_fake)
         # data_fake are 30x30 images
         data_fake = generator(create_noise(curr_batch_size))
         move_list = output_to_moves(data_fake).tolist()
         evaluations = list(map(evaluateGAN, move_list))
-        downscaled_data_fake = (FloatTensor(list(map(downscale, move_list)))/4-1).to(env.DEVICE)
+        downscaled_data_fake = (FloatTensor(list(map(downscaler.downscale_trajectory, move_list)))/4-1).to(env.DEVICE)
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         g_loss = generator.custom_train(
             discriminator, downscaled_data_fake, eval_tensor, epoch
@@ -71,25 +69,3 @@ def train_epoch(epoch, route_loader, discriminator, generator):
         float(g_loss) / len(route_loader),
         eval_avg,
     )
-
-
-def profiler():
-    pr = cProfile.Profile()
-    pr.enable()
-    gan_perceptron()
-    pr.disable()
-    ps = pstats.Stats(pr)
-    with open("profile_data.csv", "w", newline="") as csvfile:
-        fieldnames = ["function_name", "ncalls", "tottime", "cumtime"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writeheader()
-        for func, info in ps.stats.items():
-            writer.writerow(
-                {
-                    "function_name": func,
-                    "ncalls": info[0],
-                    "tottime": info[2],
-                    "cumtime": info[3],
-                }
-            )
