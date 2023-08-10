@@ -31,10 +31,15 @@ def gan_perceptron():
         if epoch % 32 == 31:
             save(
                 discriminator.state_dict(),
-                f"./output/{env.PY_ENV}/discriminator/d_{epoch}",
+                f"./output/{env.PY_ENV}/gan/discriminator/d_{epoch}",
             )
-            save(generator.state_dict(), f"./output/{env.PY_ENV}/generator/g_{epoch}")
+            save(
+                generator.state_dict(), f"./output/{env.PY_ENV}/gan/generator/g_{epoch}"
+            )
             save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
+            # generated_img = generator(noise).cpu().detach()
+            # move_tensor = output_to_moves(generated_img)
+            # tensor_to_file(move_tensor, f"output/test.{epoch}")
 
 
 def train_epoch(epoch, route_loader, discriminator, generator,downscaler:Downscaler):

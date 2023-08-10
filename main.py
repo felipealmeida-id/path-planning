@@ -6,8 +6,9 @@ from pather.main import pather
 from gan_perceptron.main import gan_perceptron
 from utilities import prepare_directory,find_enum_by_value
 from enums import ProgramModules
+
 # Initialize specific environment
-os.environ['PY_ENV'] = sys.argv[1]
+os.environ["PY_ENV"] = sys.argv[1]
 random.seed(2023)
 manual_seed(2023)
 
@@ -19,8 +20,8 @@ switch_dict = {
     ProgramModules.EVALUATOR:"",
     ProgramModules.DRAWER:""
 }
-module_enum = find_enum_by_value(ProgramModules,module)
-os.environ['MODULE'] = module
+module_enum = find_enum_by_value(ProgramModules, module)
+os.environ["MODULE"] = module
 prepare_directory()
 if len(sys.argv) > 3 and sys.argv[3] == 'p':
     from profiler.profiler import CustomProfiler
