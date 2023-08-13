@@ -5,10 +5,17 @@ from .discriminator import Discriminator
 from downscaler.downscaler import Downscaler
 from evaluator.main import evaluateGAN
 from time import time
+from .approaches import EvaluatorModuleApproach, WeightApproach
 
 
 def gan_perceptron():
-    from .utils import load_dataset, save_progress
+    from .utils import (
+        load_dataset,
+        save_progress,
+        create_noise,
+        output_to_moves,
+        tensor_to_file,
+    )
 
     env = Env.get_instance()
     route_loader = load_dataset()
@@ -21,14 +28,16 @@ def gan_perceptron():
     for epoch in range(env.EPOCHS):
         start = time()
         d_loss, g_loss, eval_avg = train_epoch(
-            epoch, route_loader, discriminator, generator,downscaler
+            epoch, route_loader, discriminator, generator, downscaler
         )
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)
         end = time()
-        print(f"{end-start}s")
-        if epoch % 32 == 31:
+        print(
+            f"Epoch {epoch} | D loss: {d_loss} | G loss: {g_loss} | Eval avg: {eval_avg} | Time: {end - start}"
+        )
+        if epoch % 10 == 0:
             save(
                 discriminator.state_dict(),
                 f"./output/{env.PY_ENV}/gan/discriminator/d_{epoch}",
@@ -37,15 +46,20 @@ def gan_perceptron():
                 generator.state_dict(), f"./output/{env.PY_ENV}/gan/generator/g_{epoch}"
             )
             save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
-            # generated_img = generator(noise).cpu().detach()
-            # move_tensor = output_to_moves(generated_img)
-            # tensor_to_file(move_tensor, f"output/test.{epoch}")
+            noise = create_noise(3)
+            generated_img = generator(noise).to(env.DEVICE).detach()
+            move_tensor = output_to_moves(generated_img)
+            tensor_to_file(
+                move_tensor, f"output/{env.PY_ENV}/gan/generated_imgs/test.{epoch}"
+            )
 
 
-def train_epoch(epoch, route_loader, discriminator, generator,downscaler:Downscaler):
+def train_epoch(epoch, route_loader, discriminator, generator, downscaler: Downscaler):
     from .utils import create_noise, output_to_moves
 
     env = Env.get_instance()
+    d_loss_acum = 0
+    g_loss_acum = 0
     for _, (images, _) in enumerate(route_loader):
         images = images.to(env.DEVICE)
         curr_batch_size = images.size(0)
@@ -53,24 +67,40 @@ def train_epoch(epoch, route_loader, discriminator, generator,downscaler:Downsca
             # data_fake are 30x30 images
             data_fake = generator(create_noise(curr_batch_size))
             data_real = images
-            downscaled_data_fake = (FloatTensor(list(
-                map(downscaler.downscale_trajectory, (output_to_moves(data_fake).tolist()))
-            ))/4-1).to(env.DEVICE)
+            downscaled_data_fake = (
+                FloatTensor(
+                    list(
+                        map(
+                            downscaler.downscale_trajectory,
+                            (output_to_moves(data_fake).tolist()),
+                        )
+                    )
+                )
+                / 4
+                - 1
+            ).to(env.DEVICE)
             d_loss = discriminator.custom_train(data_real, downscaled_data_fake)
+            d_loss_acum += d_loss
         # data_fake are 30x30 images
         data_fake = generator(create_noise(curr_batch_size))
         move_list = output_to_moves(data_fake).tolist()
-        evaluations = list(map(evaluateGAN, move_list))
-        downscaled_data_fake = (FloatTensor(list(map(downscaler.downscale_trajectory, move_list)))/4-1).to(env.DEVICE)
+        evaluatorModules = EvaluatorModuleApproach.get_instance().get_evaluator_modules(
+            epoch
+        )
+        evaluations = list(map(lambda x: evaluateGAN(x, evaluatorModules), move_list))
+        downscaled_data_fake = (
+            FloatTensor(list(map(downscaler.downscale_trajectory, move_list))) / 4 - 1
+        ).to(env.DEVICE)
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         g_loss = generator.custom_train(
             discriminator, downscaled_data_fake, eval_tensor, epoch
         )
+        g_loss_acum += g_loss
         eval_avg = eval_tensor.mean()
         eval_tensor.detach()
         del eval_tensor
     return (
-        float(d_loss) / len(route_loader),
-        float(g_loss) / len(route_loader),
+        float(d_loss_acum) / len(route_loader),
+        float(g_loss_acum) / len(route_loader),
         eval_avg,
     )
