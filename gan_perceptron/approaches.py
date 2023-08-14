@@ -6,6 +6,7 @@ from enum import Enum
 class WeightApproachEnum(Enum):
     LINEAR = "linear"
     EXPONENTIAL_SIGMOID = "exponential_sigmoid"
+    CONSTANT = "constant"
 
 
 class WeightApproach:
@@ -35,8 +36,15 @@ class WeightApproach:
             return self.__linear(epoch)
         elif self.approach == WeightApproachEnum.EXPONENTIAL_SIGMOID:
             return self.__exponential_sigmoid(epoch)
+        elif self.approach == WeightApproachEnum.CONSTANT:
+            return self.__constant(epoch)
         else:
             raise Exception("Invalid approach")
+
+    def __constant(self, epoch):
+        evalWeight = 0.6
+        regularWeight = 1 - evalWeight
+        return evalWeight, regularWeight
 
     def __linear(self, epoch):
         evalWeight = epoch / self.EPOCHS
