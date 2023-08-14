@@ -29,8 +29,6 @@ class Generator(Module):
             Linear(1024, env.UAV_AMOUNT * (env.TOTAL_TIME * 2)),
             Tanh(),
         )
-        constant_(self.main[-2].bias, -1.2)
-
         self.optimizer = Adam(self.parameters(), lr=env.G_LEARN_RATE)
 
     def forward(self, x):
