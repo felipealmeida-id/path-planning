@@ -35,32 +35,6 @@ def distance(one:Coord,other:Coord):
         distance += 1
     return distance
 
-def x_delta(move: Move):
-    """
-    Calculates the shift a Move produces in the X axis
-    """
-    positives = [Move.DIAG_DOWN_RIGHT, Move.RIGHT, Move.DIAG_UP_RIGHT]
-    negatives = [Move.DIAG_DOWN_LEFT, Move.LEFT, Move.DIAG_UP_LEFT]
-    if move in positives:
-        return 1
-    elif move in negatives:
-        return -1
-    else:
-        return 0
-
-def y_delta(move: Move):
-    """
-    Calculates the shift a Move produces in the Y axis
-    """
-    positives = [Move.DIAG_UP_RIGHT, Move.DIAG_UP_LEFT, Move.UP]
-    negatives = [Move.DIAG_DOWN_RIGHT, Move.DIAG_DOWN_LEFT, Move.DOWN]
-    if move in positives:
-        return 1
-    elif move in negatives:
-        return -1
-    else:
-        return 0
-
 def move_delta(move:Move)->tuple[int,int]:
     return delta_dict[move]
 
