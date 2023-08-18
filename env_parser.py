@@ -56,8 +56,9 @@ class Env:
         print(f"Loading .env.{PY_ENV}")
         load_dotenv(dotenv_path=f"./envs/.env.{PY_ENV}")
         switch_dict = {
+            ProgramModules.DRAWER: self._parse_env_pather,
             ProgramModules.PATHER: self._parse_env_pather,
-            ProgramModules.PERCEPTRON: self._parse_env_gan,
+            ProgramModules.PERCEPTRON: self._parse_env_gan
         }
         switch_dict[module_enum]()
         self.BATCH_SIZE = int(getenv("BATCH_SIZE"))

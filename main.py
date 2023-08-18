@@ -4,6 +4,7 @@ import os
 from torch import manual_seed
 from pather.main import pather
 from gan_perceptron.main import gan_perceptron
+from drawer.main import draw_route
 from utilities import prepare_directory,find_enum_by_value
 from enums import ProgramModules
 
@@ -13,17 +14,17 @@ random.seed(2023)
 manual_seed(2023)
 
 module = sys.argv[2]
-
+module_enum = find_enum_by_value(ProgramModules, module)
+os.environ["MODULE"] = module
+draw_path = sys.argv[3] if module_enum == ProgramModules.DRAWER else ''
+prepare_directory()
 switch_dict = {
     ProgramModules.PATHER:pather,
     ProgramModules.PERCEPTRON:gan_perceptron,
-    ProgramModules.EVALUATOR:"",
-    ProgramModules.DRAWER:""
+    ProgramModules.DRAWER:lambda: draw_route(draw_path),
+    ProgramModules.EVALUATOR:""
 }
-module_enum = find_enum_by_value(ProgramModules, module)
-os.environ["MODULE"] = module
-prepare_directory()
-if len(sys.argv) > 3 and sys.argv[3] == 'p':
+if sys.argv[-1] == 'p':
     from profiler.profiler import CustomProfiler
     profiler = CustomProfiler()
     profiler.profile_fun(switch_dict[module_enum])
