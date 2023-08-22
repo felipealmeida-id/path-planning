@@ -1,5 +1,5 @@
 from os import listdir,path,mkdir
-from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor
+from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor,save
 from torch.utils.data import DataLoader, TensorDataset
 
 from env_parser import Env
@@ -61,3 +61,14 @@ def save_progress(g_losses:list[float],d_losses:list[float],eval_avgs:list[float
     g_losses.clear()
     d_losses.clear()
     eval_avgs.clear()
+
+def checkpoint(discriminator,generator,epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch):
+    from env_parser import Env
+    env = Env.get_instance()
+    save(discriminator.state_dict(),f"./output/{env.PY_ENV}/gan/discriminator/d_{epoch}",)
+    save(generator.state_dict(), f"./output/{env.PY_ENV}/gan/generator/g_{epoch}")
+    save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
+    noise = create_noise(3)
+    generated_img = generator(noise).to(env.DEVICE).detach()
+    move_tensor = output_to_moves(generated_img)
+    tensor_to_file(move_tensor, f"output/{env.PY_ENV}/gan/generated_imgs/test.{epoch}")

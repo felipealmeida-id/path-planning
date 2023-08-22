@@ -43,6 +43,7 @@ class Env:
     WEIGHT_APPROACH: WeightApproachEnum
     EVALUATOR_APPROACH: EvaluatorModuleApproachEnum
     DATASET: str
+    CONSTANT_EVALUATION_WEIGHT:float
 
     def __init__(self):
         # Check which environment to load
@@ -105,6 +106,7 @@ class Env:
             EvaluatorModuleApproachEnum, getenv("EVALUATOR_APPROACH")
         )
         self.DATASET = getenv("DATASET")
+        self.CONSTANT_EVALUATION_WEIGHT = float(getenv("CONSTANT_EVALUATION_WEIGHT"))
 
     @classmethod
     def get_instance(self):
@@ -118,6 +120,15 @@ class Env:
         try:
             x_as_float = float(x)
             return x, success and x_as_float > 0
+        except:
+            return x, False
+
+    def _non_negative_float(self, args: tuple[str, bool]):
+        x: str = args[0]
+        success: bool = args[1] if len(args) > 1 else True
+        try:
+            x_as_float = float(x)
+            return x, success and x_as_float >= 0
         except:
             return x, False
 
@@ -213,4 +224,5 @@ class Env:
         validators["K"] = self._greater_than_zero_int
         validators["NOISE_DIMENSION"] = self._greater_than_zero_int
         validators["SAMPLE_SIZE"] = self._greater_than_zero_int
+        validators["CONSTANT_EVALUATION_WEIGHT"] = self._non_negative_float
         self._validate_parameters(validators)
