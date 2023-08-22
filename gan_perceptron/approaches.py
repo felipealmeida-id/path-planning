@@ -42,7 +42,7 @@ class WeightApproach:
             raise Exception("Invalid approach")
 
     def __constant(self, epoch):
-        evalWeight = 0.6
+        evalWeight = 0
         regularWeight = 1 - evalWeight
         return evalWeight, regularWeight
 

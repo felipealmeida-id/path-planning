@@ -69,7 +69,9 @@ def train_epoch(epoch:int, route_loader, discriminator:Discriminator, generator:
         evaluatorModules = EvaluatorModuleApproach.get_instance().get_evaluator_modules(
             epoch
         )
-        evaluations = list(map(lambda x: evaluateGAN(x, evaluatorModules), move_list))
+        # evaluations = list(map(lambda x: evaluateGAN(x, evaluatorModules), move_list))
+        # all will evaluate 0
+        evaluations = [0] * len(move_list)
         downscaled_data_fake = (
             FloatTensor(list(map(downscaler.downscale_trajectory, move_list))) / 4 - 1
         ).to(env.DEVICE)
