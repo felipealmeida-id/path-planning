@@ -10,14 +10,14 @@ class Generator(nn.Module):
             
             # Initial dense layer
             self.dense = nn.Sequential(
-                nn.Linear(latent_dim, hidden_dim * 20),
+                nn.Linear(latent_dim, hidden_dim * self.seq_length),
                 nn.ReLU(),
                 nn.Dropout(0.3)
             )
             
             # LSTM layers
-            self.lstm1 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True, dropout=0.2)
-            self.lstm2 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True, dropout=0.2)
+            self.lstm1 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True)
+            # self.lstm2 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True)
             
             # Output layer
             self.out = nn.Sequential(
@@ -26,11 +26,15 @@ class Generator(nn.Module):
                 nn.Linear(hidden_dim, 2),
                 nn.Tanh()
             )
+
+            # initialize the linear layer from the dense layer using he_uniform initialization
+            nn.init.kaiming_uniform_(self.dense[0].weight, nonlinearity='relu')
+            
         
     def forward(self, z):
         x = self.dense(z)
-        x = x.view(z.size(0), 20, -1)
+        x = x.view(z.size(0), self.seq_length, -1)
         x, _ = self.lstm1(x)
-        x, _ = self.lstm2(x)
+        # x, _ = self.lstm2(x)
         x = self.out(x)
         return x
