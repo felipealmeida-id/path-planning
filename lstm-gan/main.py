@@ -85,13 +85,15 @@ class GAN():
                 self.discriminator.zero_grad()
 
                 # Entrenamiento con datos reales
-                valid = torch.ones(current_batch_size, 1).to(self.device)  # Etiquetas para datos reales
+                smooth_real_label = 0.9  # You can adjust this value as needed
+                valid = torch.full((current_batch_size, 1), smooth_real_label, device=self.device)  # Etiquetas para datos reales
                 real_loss = self.criterion(self.discriminator(real_seqs), valid)
                 
                 # Entrenamiento con datos generados
                 z = torch.randn(current_batch_size, self.latent_dim).to(self.device)
                 fake_seqs = self.generator(z)
-                fake = torch.zeros(current_batch_size, 1).to(self.device)  # Etiquetas para datos generados
+                smooth_fake_label = 0.1  # You can adjust this value as needed, or keep it at 0
+                fake = torch.full((current_batch_size, 1), smooth_fake_label, device=self.device)  # Etiquetas para datos generados
                 fake_loss = self.criterion(self.discriminator(fake_seqs.detach()), fake)
                 
                 # Combina las pérdidas y actualiza el Discriminador
