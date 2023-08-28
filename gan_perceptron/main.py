@@ -84,7 +84,7 @@ def train_epoch(epoch:int, route_loader, discriminator:Discriminator, generator:
         eval_tensor.detach()
         del eval_tensor
     return (
-        float(d_loss_acum) / len(route_loader),
+        float(d_loss_acum) / len(route_loader) / env.K,
         float(g_loss_acum) / len(route_loader),
         eval_avg,
     )
