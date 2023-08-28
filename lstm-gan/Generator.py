@@ -17,7 +17,7 @@ class Generator(nn.Module):
             
             # LSTM layers
             self.lstm1 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True)
-            # self.lstm2 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True)
+            self.lstm2 = nn.LSTM(input_size=hidden_dim, hidden_size=hidden_dim, batch_first=True)
             
             # Output layer
             self.out = nn.Sequential(
@@ -35,6 +35,6 @@ class Generator(nn.Module):
         x = self.dense(z)
         x = x.view(z.size(0), self.seq_length, -1)
         x, _ = self.lstm1(x)
-        # x, _ = self.lstm2(x)
+        x, _ = self.lstm2(x)
         x = self.out(x)
         return x

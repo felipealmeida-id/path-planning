@@ -11,8 +11,8 @@ from Discriminator import Discriminator
 
 def denormalize_coordinates(coordinates, max_val=14):
     """Denormaliza una lista de coordenadas del rango de -1 a 1 al rango 0 a max_val y redondea a enteros."""
-    # return [(int(round(0.5 * (x + 1) * max_val)), int(round(0.5 * (y + 1) * max_val))) for x, y in coordinates]
-    return coordinates
+    return [(int(round(0.5 * (x + 1) * max_val)), int(round(0.5 * (y + 1) * max_val))) for x, y in coordinates]
+    # return coordinates
 
 def normalize_coordinates(coordinates, max_val=14):
     """Normaliza una lista de coordenadas al rango de -1 a 1."""
@@ -65,8 +65,8 @@ class GAN():
         self.device = device
         
         # Definimos los optimizadores
-        self.optimizer_G = torch.optim.Adam(self.generator.parameters(), lr=0.0002)
-        self.optimizer_D = torch.optim.Adam(self.discriminator.parameters(), lr=0.0001)
+        self.optimizer_G = torch.optim.Adam(self.generator.parameters(), lr=0.00025)
+        self.optimizer_D = torch.optim.Adam(self.discriminator.parameters(), lr=0.0002)
         
         # Definimos la función de pérdida binaria cruzada
         self.criterion = nn.BCELoss()
@@ -82,24 +82,25 @@ class GAN():
                 real_seqs = real_seqs.to(self.device)
 
                 # --- Entrenamiento del Discriminador ---
-                self.discriminator.zero_grad()
+                for _ in range(1):
+                    self.discriminator.zero_grad()
 
-                # Entrenamiento con datos reales
-                smooth_real_label = 0.9  # You can adjust this value as needed
-                valid = torch.full((current_batch_size, 1), smooth_real_label, device=self.device)  # Etiquetas para datos reales
-                real_loss = self.criterion(self.discriminator(real_seqs), valid)
-                
-                # Entrenamiento con datos generados
-                z = torch.randn(current_batch_size, self.latent_dim).to(self.device)
-                fake_seqs = self.generator(z)
-                smooth_fake_label = 0.1  # You can adjust this value as needed, or keep it at 0
-                fake = torch.full((current_batch_size, 1), smooth_fake_label, device=self.device)  # Etiquetas para datos generados
-                fake_loss = self.criterion(self.discriminator(fake_seqs.detach()), fake)
-                
-                # Combina las pérdidas y actualiza el Discriminador
-                d_loss = (real_loss + fake_loss)
-                d_loss.backward()
-                self.optimizer_D.step()
+                    # Entrenamiento con datos reales
+                    smooth_real_label = 0.8  # You can adjust this value as needed
+                    valid = torch.full((current_batch_size, 1), smooth_real_label, device=self.device)  # Etiquetas para datos reales
+                    real_loss = self.criterion(self.discriminator(real_seqs), valid)
+                    
+                    # Entrenamiento con datos generados
+                    z = torch.randn(current_batch_size, self.latent_dim).to(self.device)
+                    fake_seqs = self.generator(z)
+                    smooth_fake_label = 0.2  # You can adjust this value as needed, or keep it at 0
+                    fake = torch.full((current_batch_size, 1), smooth_fake_label, device=self.device)  # Etiquetas para datos generados
+                    fake_loss = self.criterion(self.discriminator(fake_seqs.detach()), fake)
+                    
+                    # Combina las pérdidas y actualiza el Discriminador
+                    d_loss = (real_loss + fake_loss)
+                    d_loss.backward()
+                    self.optimizer_D.step()
                 
                 # --- Entrenamiento del Generador ---
                 for _ in range(1):
