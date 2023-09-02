@@ -10,7 +10,7 @@ def draw_route(file:str):
     env = Env.get_instance()
     x_dim = env.HR_ENVIRONMENT_X_AXIS if False else env.ENVIRONMENT_X_AXIS
     y_dim = env.HR_ENVIRONMENT_Y_AXIS if False else env.ENVIRONMENT_Y_AXIS
-    PAUSE_TIME = 0.01
+    PAUSE_TIME = 0.001
     time = env.HR_TOTAL_TIME if False else env.TOTAL_TIME
     _configure_graph()
     _draw_pois()
