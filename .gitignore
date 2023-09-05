@@ -3,3 +3,8 @@ __pycache__
 output/*
 .vscode
 inputs
+dataset
+model
+test
+
+downscaler/NN_downscaler/primercommit/test/

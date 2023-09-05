@@ -6,12 +6,13 @@ from pather.utils.utilities import move_delta
 
 
 colors = ['b', 'g', 'r', 'c', 'm', 'k']
+HR = False
 def draw_route(file:str):
     env = Env.get_instance()
-    x_dim = env.HR_ENVIRONMENT_X_AXIS if False else env.ENVIRONMENT_X_AXIS
-    y_dim = env.HR_ENVIRONMENT_Y_AXIS if False else env.ENVIRONMENT_Y_AXIS
+    x_dim = env.HR_ENVIRONMENT_X_AXIS if HR else env.ENVIRONMENT_X_AXIS
+    y_dim = env.HR_ENVIRONMENT_Y_AXIS if HR else env.ENVIRONMENT_Y_AXIS
     PAUSE_TIME = 0.01
-    time = env.HR_TOTAL_TIME if False else env.TOTAL_TIME
+    time = env.HR_TOTAL_TIME if HR else env.TOTAL_TIME
     _configure_graph()
     _draw_pois()
     _draw_obstacles()
@@ -42,8 +43,8 @@ def draw_route(file:str):
 #################################################################################################################################################################################################### 
 def _configure_graph():
     env = Env.get_instance()
-    x_dim = env.HR_ENVIRONMENT_X_AXIS if False else env.ENVIRONMENT_X_AXIS
-    y_dim = env.HR_ENVIRONMENT_Y_AXIS if False else env.ENVIRONMENT_Y_AXIS
+    x_dim = env.HR_ENVIRONMENT_X_AXIS if HR else env.ENVIRONMENT_X_AXIS
+    y_dim = env.HR_ENVIRONMENT_Y_AXIS if HR else env.ENVIRONMENT_Y_AXIS
 
     plt.figure()
     plt.xlim(-0.3, x_dim+0.3)
