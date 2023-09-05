@@ -44,6 +44,7 @@ class Env:
     EVALUATOR_APPROACH: EvaluatorModuleApproachEnum
     DATASET: str
     CONSTANT_EVALUATION_WEIGHT:float
+    TRAINED_DOWNSCALER_PATH:str
 
     def __init__(self):
         # Check which environment to load
@@ -107,6 +108,7 @@ class Env:
         )
         self.DATASET = getenv("DATASET")
         self.CONSTANT_EVALUATION_WEIGHT = float(getenv("CONSTANT_EVALUATION_WEIGHT"))
+        self.TRAINED_DOWNSCALER_PATH = getenv("TRAINED_DOWNSCALER_PATH")
 
     @classmethod
     def get_instance(self):
@@ -151,6 +153,11 @@ class Env:
         x = args[0]
         success = args[1] if len(args) > 1 else True
         return self._non_zero(self._non_negative_integer((x, success)))
+
+    def _str(self, args: tuple[str, bool]):
+        x = args[0]
+        success = args[1] if len(args) > 1 else True
+        return x,success
 
     def _coord_list(self, args: tuple[str, bool]):
         x = args[0]
@@ -225,4 +232,5 @@ class Env:
         validators["NOISE_DIMENSION"] = self._greater_than_zero_int
         validators["SAMPLE_SIZE"] = self._greater_than_zero_int
         validators["CONSTANT_EVALUATION_WEIGHT"] = self._non_negative_float
+        validators["TRAINED_DOWNSCALER_PATH"] = self._str
         self._validate_parameters(validators)

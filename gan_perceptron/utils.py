@@ -34,7 +34,7 @@ def load_dataset():
     files_tensor_routes = (tensor(all_file_routes,dtype=float32) / 4 - 1).to(env.DEVICE)
     _labels = torchZeros(len(files_tensor_routes)).to(env.DEVICE)
     files_dataset = TensorDataset(files_tensor_routes,_labels)
-    route_loader = DataLoader(files_dataset,batch_size=env.BATCH_SIZE,shuffle=True)
+    route_loader = DataLoader(files_dataset,env.BATCH_SIZE,shuffle=True)
     return route_loader
 
 def output_to_moves(route:Tensor) -> Tensor:
