@@ -1,6 +1,7 @@
 import os
 import torch
-import torch.nn as nn
+from json import load,dump
+from torch.nn import Module,Sequential, Linear, BatchNorm1d, Dropout, ReLU, Sigmoid, MSELoss
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset, random_split
 from torch.optim.lr_scheduler import StepLR
@@ -9,29 +10,20 @@ import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
-
-class TrajectoryDataset(Dataset):
+    
+class OHEDataset(Dataset):
     def __init__(self, input_dir, output_dir):
         self.inputs = []
         self.outputs = []
-        
         input_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith('.txt')]
         output_files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('.txt')]
-
         for input_filepath, output_filepath in zip(input_files, output_files):
             with open(input_filepath, 'r') as f:
-                lines = f.readlines()
-                input_data = [list(map(int, line.strip().split())) for line in lines]
-                # Normalize data to [0, 1]
-                self.inputs.append(np.array(input_data, dtype=np.float32) / 8)
-
+                list_input = load(f)
+                self.inputs.append(np.array(list_input,dtype=np.float32))
             with open(output_filepath, 'r') as f:
-                lines = f.readlines()
-                output_data = [list(map(int, line.strip().split())) for line in lines]
-                # Normalize data to [0, 1]
-                self.outputs.append(np.array(output_data, dtype=np.float32) / 8)
-        
-        # Convert list of numpy arrays to a single numpy array and then to a torch tensor
+                list_output = load(f)
+                self.outputs.append(np.array(list_output,dtype=np.float32))
         self.inputs = torch.tensor(np.array(self.inputs)).to(device)
         self.outputs = torch.tensor(np.array(self.outputs)).to(device)
 
@@ -41,71 +33,42 @@ class TrajectoryDataset(Dataset):
     def __getitem__(self, idx):
         return self.inputs[idx], self.outputs[idx]
     
-    # Method to denormalize data
-    @staticmethod
-    def denormalize(data):
-        return np.round(data * 8)
-    
-    
-class NeuralDownscaler(nn.Module):
+
+class NeuralDownscaler(Module):
     def __init__(self):
         super(NeuralDownscaler, self).__init__()
-        self.fc1 = nn.Linear(400, 1024)
-        self.fc2 = nn.Linear(1024, 512)
-        self.fc3 = nn.Linear(512, 512)
-        self.fc4 = nn.Linear(512, 256)
-        self.fc5 = nn.Linear(256, 200)
-
-        self.bn1 = nn.BatchNorm1d(1024)
-        self.bn2 = nn.BatchNorm1d(512)
-        self.bn3 = nn.BatchNorm1d(512)
-        self.bn4 = nn.BatchNorm1d(256)
-
-        self.dropout1 = nn.Dropout(0.5)
-        self.dropout2 = nn.Dropout(0.4)
-        self.dropout3 = nn.Dropout(0.3)
-        self.dropout4 = nn.Dropout(0.2)
+        self.seq = Sequential(
+            Linear(2 * 200 * 4, 2048),
+            ReLU(),
+            Dropout(0.2),
+            Linear(2048, 1024),
+            ReLU(),
+            Dropout(0.1),
+            Linear(1024, 512),
+            ReLU(),
+            Dropout(0.1),
+            Linear(512, 512),
+            ReLU(),
+            Dropout(0.1),
+            Linear(512, 200 * 4),
+            Sigmoid()
+        )
 
     def forward(self, x):
-        batch_size, num_lines, num_features = x.shape  # x.shape should be [batch_size, 2, 400]
-        
-        # Reshape to pass through the network 
-        x = x.view(-1, num_features)  # shape becomes [batch_size * 2, 400]
-        
-        # Forward pass
-        x = torch.relu(self.bn1(self.fc1(x)))
-        x = self.dropout1(x)
-        
-        x = torch.relu(self.bn2(self.fc2(x)))
-        x = self.dropout2(x)
-
-        x = torch.relu(self.bn3(self.fc3(x)))
-        x = self.dropout3(x)
-
-        x = torch.relu(self.bn4(self.fc4(x)))
-        x = self.dropout4(x)
-
-        x = self.fc5(x)
-        # Use sigmoid activation
-        x = torch.sigmoid(x)
-        
-        # Reshape back to [batch_size, 2, 200]
-        x = x.view(batch_size, num_lines, -1)
-
+        batch_size, num_lines, num_features, num_labels = x.shape
+        x = x.view(-1, num_features * num_labels)  # shape becomes [batch_size * num_lines, 400 * num_labels]
+        x = self.seq(x)
+        x = x.view(batch_size, num_lines, 200, num_labels)
         return x
 
-    
-
-input_dir = 'dataset/input'
-output_dir = 'dataset/output'
 
 # Parameters
-input_dir = 'dataset/input'
-output_dir = 'dataset/output'
+input_dir = 'encode/input'
+output_dir = 'encode/output'
 n_epochs = 1000
 
 # Dataset and dataloaders
-dataset = TrajectoryDataset(input_dir, output_dir)
+dataset = OHEDataset(input_dir, output_dir)
 val_size = int(0.20 * len(dataset))
 train_size = len(dataset) - val_size
 train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
@@ -116,7 +79,7 @@ val_loader = DataLoader(val_dataset, batch_size=32)
 model = NeuralDownscaler().to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 scheduler = StepLR(optimizer, step_size=100, gamma=0.9)
-criterion = nn.MSELoss()
+criterion = MSELoss()
 
 # Create directories if they don't exist
 os.makedirs('test', exist_ok=True)
@@ -158,14 +121,13 @@ for epoch in range(1, n_epochs + 1):
         torch.save(model.state_dict(), f'model/model_epoch_{epoch}.pt')
         
         # Save a sample input and output for testing
-        single_input = data[0].cpu()
-        single_output = output[0].detach().cpu()
+        single_input = data[0].round().to(torch.int).cpu().tolist()
+        single_output =output[0].detach().round().to(torch.int).cpu().tolist()
         
-        input_denormalized = TrajectoryDataset.denormalize(single_input)
-        np.savetxt(f'test/input_epoch_{epoch}.txt', input_denormalized, fmt='%d')
-        
-        output_denormalized = TrajectoryDataset.denormalize(single_output)
-        np.savetxt(f'test/output_epoch_{epoch}.txt', output_denormalized, fmt='%.6f')
+        with open(f'test/input_epoch_{epoch}.txt','w') as input_file:
+            dump(single_input,input_file)
+        with open(f'test/output_epoch_{epoch}.txt','w') as output_file:
+            dump(single_output,output_file)
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
