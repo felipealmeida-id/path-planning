@@ -8,3 +8,5 @@ model
 test
 
 downscaler/NN_downscaler/primercommit/test/
+
+*.txt
