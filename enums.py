@@ -47,6 +47,7 @@ class EvaluatorModules(Enum):
 class ProgramModules(Enum):
     EVALUATOR   = 'eval'
     PERCEPTRON  = 'gan'
+    CARTESIAN   = 'cartesian'
     PATHER      = 'path'
     DRAWER      = 'draw'
 

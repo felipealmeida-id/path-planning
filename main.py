@@ -4,6 +4,7 @@ import os
 from torch import manual_seed
 from pather.main import pather
 from gan_perceptron.main import gan_perceptron
+from cartesianGAN.main import gan_cartesian
 from drawer.main import draw_route
 from utilities import prepare_directory,find_enum_by_value
 from enums import ProgramModules
@@ -21,6 +22,7 @@ prepare_directory()
 switch_dict = {
     ProgramModules.PATHER:pather,
     ProgramModules.PERCEPTRON:gan_perceptron,
+    ProgramModules.CARTESIAN:gan_cartesian,
     ProgramModules.DRAWER:lambda: draw_route(draw_path),
     ProgramModules.EVALUATOR:""
 }

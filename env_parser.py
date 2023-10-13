@@ -6,7 +6,7 @@ from os.path import exists as file_exists
 from torch import device, cuda
 from utilities import find_enum_by_value
 from enums import ProgramModules
-from gan_perceptron.approaches import WeightApproachEnum, EvaluatorModuleApproachEnum
+from cartesianGAN.approaches import WeightApproachEnum, EvaluatorModuleApproachEnum
 
 
 class Env:
@@ -60,7 +60,8 @@ class Env:
         switch_dict = {
             ProgramModules.DRAWER: self._parse_env_pather,
             ProgramModules.PATHER: self._parse_env_pather,
-            ProgramModules.PERCEPTRON: self._parse_env_gan
+            ProgramModules.PERCEPTRON: self._parse_env_gan,
+            ProgramModules.CARTESIAN: self._parse_env_gan,
         }
         switch_dict[module_enum]()
         self.BATCH_SIZE = int(getenv("BATCH_SIZE"))
