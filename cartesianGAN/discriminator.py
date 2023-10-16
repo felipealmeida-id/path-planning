@@ -50,21 +50,25 @@ class Discriminator(Module):
         x = x.view(-1, self.n_input)
         return self.main(x)
 
-    def custom_train(self, data_real: Tensor, data_fake: Tensor):
-        curr_batch_size = data_real.size(0)
-        real_label = label_real(curr_batch_size)
-        fake_label = label_fake(curr_batch_size)
+    # Update to Discriminator's custom_train
+    def custom_train(self, real_data, fake_data):
         self.optimizer.zero_grad()
-        output_real = self(data_real)
-        real_smooth_label = self.label_smoothing(real_label)
-        loss_real = self.loss_function(output_real, real_smooth_label)
-        output_fake = self(data_fake)
-        fake_smooth_label = self.label_smoothing(fake_label)
-        loss_fake = self.loss_function(output_fake, fake_smooth_label)
-        loss_real.backward()
-        loss_fake.backward()
+
+        # Calculate the loss for real and fake data
+        real_loss = self(real_data).mean()
+        fake_loss = self(fake_data).mean()
+
+        # WGAN loss
+        loss = fake_loss - real_loss
+
+        loss.backward()
         self.optimizer.step()
-        return loss_real + loss_fake
+
+        # Clip weights of discriminator
+        for p in self.parameters():
+            p.data.clamp_(-0.01, 0.01)
+
+        return loss.item()
 
     def label_smoothing(self, target, smoothing=0.2):
         return target * (1 - smoothing) + 0.5 * smoothing

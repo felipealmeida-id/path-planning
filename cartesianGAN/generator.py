@@ -34,17 +34,30 @@ class Generator(Module):
         env = Env.get_instance()
         return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME , 2)
 
-    def custom_train(
-        self, discriminator: Discriminator, data_fake, eval_tensor, epoch: int
-    ):
-        curr_batch_size = data_fake.size(0)
-        real_label = label_real(curr_batch_size)
+    def custom_train(self, discriminator, fake_data, eval_tensor, epoch):
         self.optimizer.zero_grad()
-        output = discriminator(data_fake)
-        eval_weight, regular_weight = WeightApproach.get_instance().get_weights(epoch)
-        self.loss_fun.adjust_weights(eval_weight, regular_weight)
-        self.loss_fun.set_evaluations(eval_tensor)
-        loss = self.loss_fun(output, real_label)
+
+        # WGAN loss
+        loss = -discriminator(fake_data).mean()
+
+        # Here you can add any other loss components, like the evaluation loss.
+        # For this example, I'm ignoring eval_tensor, but you can integrate it as needed.
+
         loss.backward()
         self.optimizer.step()
-        return loss
+
+        return loss.item()
+    # def custom_train(
+    #     self, discriminator: Discriminator, data_fake, eval_tensor, epoch: int
+    # ):
+    #     curr_batch_size = data_fake.size(0)
+    #     real_label = label_real(curr_batch_size)
+    #     self.optimizer.zero_grad()
+    #     output = discriminator(data_fake)
+    #     eval_weight, regular_weight = WeightApproach.get_instance().get_weights(epoch)
+    #     self.loss_fun.adjust_weights(eval_weight, regular_weight)
+    #     self.loss_fun.set_evaluations(eval_tensor)
+    #     loss = self.loss_fun(output, real_label)
+    #     loss.backward()
+    #     self.optimizer.step()
+    #     return loss
