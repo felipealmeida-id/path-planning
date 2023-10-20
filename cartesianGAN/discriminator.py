@@ -1,7 +1,7 @@
 from torch import Tensor, randn
 from torch.nn import Module, Linear, Sequential, LeakyReLU, Dropout, Sigmoid, BCELoss
 from torch.nn.modules.loss import _Loss
-from torch.optim import Optimizer, Adam
+from torch.optim import Optimizer, Adam, SGD
 from torch.nn import init
 
 from env_parser import Env
@@ -17,7 +17,7 @@ class Discriminator(Module):
         super(Discriminator, self).__init__()
         self.n_input = env.UAV_AMOUNT * env.TOTAL_TIME * 2
         self.main = self._build_model()
-        self.optimizer = Adam(self.parameters(), lr=env.D_LEARN_RATE)
+        self.optimizer = SGD(self.parameters(), lr=env.D_LEARN_RATE, momentum=0.9)
 
     def _build_model(self):
         model = Sequential(
@@ -31,7 +31,6 @@ class Discriminator(Module):
             LeakyReLU(0.2),
             Dropout(0.2),
             Linear(256, 1),
-            Sigmoid(),
         )
         self._initialize_weights(model)
         return model
@@ -69,6 +68,3 @@ class Discriminator(Module):
             p.data.clamp_(-0.01, 0.01)
 
         return loss.item()
-
-    def label_smoothing(self, target, smoothing=0.2):
-        return target * (1 - smoothing) + 0.5 * smoothing

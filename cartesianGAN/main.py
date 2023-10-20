@@ -1,4 +1,4 @@
-from torch import FloatTensor, no_grad, randn
+from torch import FloatTensor, no_grad, randn, load
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
@@ -7,18 +7,29 @@ from downscaler.nn_down import DownscalerNN
 from evaluator.main import evaluateGAN
 from time import time
 from .approaches import EvaluatorModuleApproach
-
+import os
 
 def gan_cartesian():
     from .utils import load_dataset,checkpoint
 
     env = Env.get_instance()
+    discriminator = Discriminator().to(env.DEVICE)
+    # If there is a discriminator file at the same level of this file, load it
+    if os.path.isfile('discriminator'):
+        discriminator.load_state_dict(load('discriminator'))
+        print("Discriminator loaded")
+    generator = Generator().to(env.DEVICE)
+    # If there is a generator file, load it
+    if os.path.isfile('generator'):
+        generator.load_state_dict(load('generator'))
+        print("Generator loaded")
+    print("GAN training")
     route_loader = load_dataset()
     epoch_g_losses = []
     epoch_d_losses = []
     epoch_eval_avg = []
-    discriminator = Discriminator().to(env.DEVICE)
-    generator = Generator().to(env.DEVICE)
+        
+
     # downscaler = Downscaler()
     # downscaler_nn = DownscalerNN().to(env.DEVICE)
     # downscaler_nn.custom_train(randn((800,)).to(env.DEVICE),randn((400,)).to(env.DEVICE))

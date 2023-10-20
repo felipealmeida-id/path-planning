@@ -1,7 +1,7 @@
 from torch import empty
 from torch.nn import Module, Linear, Sequential, Tanh, LeakyReLU
-from torch.nn.init import constant_
-from torch.optim import Optimizer, Adam
+from torch.nn.init import constant_, kaiming_normal_
+from torch.optim import Optimizer, Adam, SGD
 
 from env_parser import Env
 from .discriminator import Discriminator
@@ -19,7 +19,13 @@ class Generator(Module):
         env = Env.get_instance()
         super(Generator, self).__init__()
         self.noise_dim = env.NOISE_DIMENSION
-        self.main = Sequential(
+        self.main = self._build_model()
+        # Using SGD with momentum instead of Adam
+        self.optimizer = SGD(self.parameters(), lr=env.G_LEARN_RATE, momentum=0.9)
+
+    def _build_model(self):
+        env = Env.get_instance()
+        model = Sequential(
             Linear(self.noise_dim, 256),
             LeakyReLU(0.2),
             Linear(256, 512),
@@ -28,11 +34,20 @@ class Generator(Module):
             LeakyReLU(0.2),
             Linear(1024, env.UAV_AMOUNT * (env.TOTAL_TIME * 2)),
         )
-        self.optimizer = Adam(self.parameters(), lr=env.G_LEARN_RATE)
+        self._initialize_weights(model)
+        return model
+
+    def _initialize_weights(self, model):
+        for m in model.modules():
+            if isinstance(m, Linear):
+                kaiming_normal_(m.weight.data)  # Inicialización de He
+                if m.bias is not None:
+                    constant_(m.bias.data, 0)
+        return model
 
     def forward(self, x):
         env = Env.get_instance()
-        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME , 2)
+        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME, 2)
 
     def custom_train(self, discriminator, fake_data, eval_tensor, epoch):
         self.optimizer.zero_grad()
@@ -47,6 +62,9 @@ class Generator(Module):
         self.optimizer.step()
 
         return loss.item()
+    
+
+
     # def custom_train(
     #     self, discriminator: Discriminator, data_fake, eval_tensor, epoch: int
     # ):
