@@ -1,11 +1,11 @@
 from enums import EvaluatorModules, Move
-from evaluator.area_populator import populate_area
+from evaluator.area_populator import populate_area, populate_area_v2
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
 
 
 def evaluateGAN(
-    generatedList: list[list[int]], activeModules: list[EvaluatorModules] = None
+    generatedList: list[list[list[int]]], activeModules: list[EvaluatorModules] = None
 ):
     parsedList = _parseMoves(generatedList)
     return _evaluate(parsedList, activeModules)
@@ -14,7 +14,7 @@ def evaluateGAN(
 def _evaluate(
     grid: list[list[Move]], active_modules: list[EvaluatorModules] | None = None
 ):
-    area, oob_dist, oob_time, battery_evaluation = populate_area(grid)
+    area, oob_dist, oob_time, battery_evaluation = populate_area_v2(grid)
     constant_evals = {
         EvaluatorModules.OUTOFBOUND: ((oob_dist + oob_time) / 2),
         EvaluatorModules.BATTERY: battery_evaluation,

@@ -1,5 +1,5 @@
 from torch import empty
-from torch.nn import Module, Linear, Sequential, Tanh, LeakyReLU
+from torch.nn import Module, Linear, Sequential, Tanh, LeakyReLU, Sigmoid
 from torch.nn.init import constant_, kaiming_normal_
 from torch.optim import Optimizer, Adam, SGD
 
@@ -33,6 +33,7 @@ class Generator(Module):
             Linear(512, 1024),
             LeakyReLU(0.2),
             Linear(1024, env.UAV_AMOUNT * (env.TOTAL_TIME * 2)),
+            Sigmoid(),
         )
         self._initialize_weights(model)
         return model
@@ -47,8 +48,11 @@ class Generator(Module):
 
     def forward(self, x):
         env = Env.get_instance()
-        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME, 2)
-
+        # Multiply by 30 to get the correct range
+        out =  self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME, 2) *30
+        out = out.round()
+        return out
+        
     def custom_train(self, discriminator, fake_data, eval_tensor, epoch):
         self.optimizer.zero_grad()
 

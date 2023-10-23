@@ -44,8 +44,6 @@ class Discriminator(Module):
         return model
 
     def forward(self, x):
-        env = Env.get_instance()
-        x = x + randn(x.size()).to(env.DEVICE) * 0.1
         x = x.view(-1, self.n_input)
         return self.main(x)
 

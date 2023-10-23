@@ -8,7 +8,6 @@ from cartesianGAN.main import gan_cartesian
 from drawer.main import draw_route
 from utilities import prepare_directory,find_enum_by_value
 from enums import ProgramModules
-from evaluator.area_populator import test_pop_area
 # Initialize specific environment
 os.environ["PY_ENV"] = sys.argv[1]
 random.seed(2023)
@@ -26,10 +25,9 @@ switch_dict = {
     ProgramModules.DRAWER:lambda: draw_route(draw_path),
     ProgramModules.EVALUATOR:""
 }
-test_pop_area()
-# if sys.argv[-1] == 'p':
-#     from profiler.profiler import CustomProfiler
-#     profiler = CustomProfiler()
-#     profiler.profile_fun(switch_dict[module_enum])
-# else:
-#     switch_dict[module_enum]()
+if sys.argv[-1] == 'p':
+    from profiler.profiler import CustomProfiler
+    profiler = CustomProfiler()
+    profiler.profile_fun(switch_dict[module_enum])
+else:
+    switch_dict[module_enum]()
