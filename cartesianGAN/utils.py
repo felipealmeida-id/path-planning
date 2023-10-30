@@ -1,7 +1,10 @@
-from os import listdir,path,mkdir
+from os import listdir,path,mkdir, scandir
 from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor,save
 from torch.utils.data import DataLoader, TensorDataset
 from json import load, dump
+from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
+
 
 from env_parser import Env
 
@@ -17,32 +20,47 @@ def create_noise(size:int):
     env = Env.get_instance()
     return randn(size,env.NOISE_DIMENSION).to(env.DEVICE)
 
+def process_file(entry):
+    # This function processes a single file and returns the loaded data
+    if entry.is_file():
+        with open(entry.path, 'r') as file_obj:
+            return load(file_obj)
+    return None
+
+
 def load_dataset():
     env = Env.get_instance()
     root = f'./inputs/{env.PY_ENV}/input'
+    
     if not path.exists(root):
         raise AssertionError('Input directory should exist')
     
-    subdirs = listdir(root)
-    all_file_routes: list[list[list[float]]] = []
+    all_file_routes = []
     
-    for i in subdirs:
-        file_path = path.join(root, i)
-        if path.isfile(file_path):
-            with open(file_path, 'r') as file_obj:
-                file_data = load(file_obj)
-                all_file_routes.append(file_data)
-    
-    # we are going to try without normalization
+    # Using ThreadPoolExecutor to process files in parallel
+    with ThreadPoolExecutor() as executor:
+        # map returns results in the order the calls were started (which is what we want here for tqdm)
+        results = list(tqdm(executor.map(process_file, list(scandir(root))), total=len(list(scandir(root))), desc="Processing files"))
+        
+    # Append non-None results to all_file_routes
+    all_file_routes.extend(filter(None, results))
+
+    # Convert list to tensor
     files_tensor_routes = tensor(all_file_routes, dtype=float32).to(env.DEVICE)
+
+    # Normalize data only if necessary
+    if not hasattr(env, 'NO_NORMALIZATION') or not env.NO_NORMALIZATION:
+        files_tensor_routes = files_tensor_routes / (env.ENVIRONMENT_X_AXIS / 2) - 1
+    
     files_dataset = TensorDataset(files_tensor_routes)
     route_loader = DataLoader(files_dataset, env.BATCH_SIZE, shuffle=True)
     
     return route_loader
 
 def tensor_to_file(tensor_routes:Tensor,file_name:str):
+    env = Env.get_instance()
     # convert all floats to rounded integers
-    tensor_routes = tensor_routes.round().int()
+    tensor_routes = ((tensor_routes + 1) * env.ENVIRONMENT_X_AXIS/2).round().int()
     # Array con x samples de array de uavs que tienen un array de posiciones (x,y) que son floats
     route_samples:list[list[list[list[float]]]] = tensor_routes.tolist()
 
