@@ -3,7 +3,7 @@ from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
 from downscaler.downscaler import Downscaler
-from downscaler.nn_down import DownscalerNN
+from downscaler.nn_down import NeuralDownscaler
 from evaluator.main import evaluateGAN
 from time import time
 from .approaches import EvaluatorModuleApproach
@@ -19,14 +19,13 @@ def gan_perceptron():
     epoch_eval_avg = []
     discriminator = Discriminator().to(env.DEVICE)
     generator = Generator().to(env.DEVICE)
-    downscaler = Downscaler()
-    downscaler_nn = DownscalerNN().to(env.DEVICE)
+    downscaler_nn = NeuralDownscaler().to(env.DEVICE)
     # downscaler_nn.custom_train(randn((800,)).to(env.DEVICE),randn((400,)).to(env.DEVICE))
-    # downscaler_nn.load_pretrained_model()
+    downscaler_nn.load_pretrained_model()
     for epoch in range(env.EPOCHS):
         start = time()
         d_loss, g_loss, eval_avg = train_epoch(
-            epoch, route_loader, discriminator, generator, downscaler,downscaler_nn
+            epoch, route_loader, discriminator, generator,downscaler_nn
         )
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
@@ -40,7 +39,7 @@ def gan_perceptron():
 
 
 
-def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator, DS: Downscaler,DSNN:DownscalerNN):
+def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:NeuralDownscaler):
     from .utils import create_noise
 
     def downscale(data_to_downscale):
@@ -57,9 +56,9 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator, DS: 
             # data_fake are 30x30 routes
             data_fake = Gen(create_noise(curr_batch_size))
             data_real = routes
-            # downscaled_data_fake = downscale(data_fake)?? ADD DOWNSCALER
-            # d_loss = Disc.custom_train(data_real, downscaled_data_fake)?? ADD DOWNSCALER
-            d_loss = Disc.custom_train(data_real, data_fake)
+            downscaled_data_fake = downscale(data_fake)
+            d_loss = Disc.custom_train(data_real, downscaled_data_fake)
+            # d_loss = Disc.custom_train(data_real, data_fake)
             d_loss_acum += d_loss
         # data_fake are 30x30 routes
         data_fake = Gen(create_noise(curr_batch_size))
@@ -69,11 +68,11 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator, DS: 
         # )
         # evaluations = list(map(lambda x: evaluateGAN(x, evaluatorModules), move_list))
         # all will evaluate 0
-        # downscaled_data_fake = downscale(data_fake) ?? ADD DOWNSCALER
+        downscaled_data_fake = downscale(data_fake)
         evaluations = [0] * curr_batch_size
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
-        # g_loss = Gen.custom_train(Disc, downscaled_data_fake, eval_tensor, epoch)?? ADD DOWNSCALER
-        g_loss = Gen.custom_train(Disc, data_fake, eval_tensor, epoch)
+        g_loss = Gen.custom_train(Disc, downscaled_data_fake, eval_tensor, epoch)
+        # g_loss = Gen.custom_train(Disc, data_fake, eval_tensor, epoch)
         g_loss_acum += g_loss
         eval_avg = eval_tensor.mean()
         eval_tensor.detach()

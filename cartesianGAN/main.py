@@ -3,7 +3,6 @@ from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
 from downscaler.downscaler import Downscaler
-from downscaler.nn_down import DownscalerNN
 from evaluator.main import evaluateGAN
 from time import time
 from .approaches import EvaluatorModuleApproach
