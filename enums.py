@@ -65,3 +65,4 @@ class EvaluatorModules(Enum):
     UPTIME = "Uptime"
     OUTOFBOUND = "OutOfBound"
     BATTERY = "Battery"
+    COHESION = "Cohesion"

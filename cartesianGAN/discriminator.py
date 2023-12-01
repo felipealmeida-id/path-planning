@@ -17,7 +17,7 @@ class Discriminator(Module):
         super(Discriminator, self).__init__()
         self.n_input = env.UAV_AMOUNT * env.TOTAL_TIME * 2
         self.main = self._build_model()
-        self.optimizer = SGD(self.parameters(), lr=env.D_LEARN_RATE, momentum=0.9)
+        self.optimizer = Adam(self.parameters(), lr=env.D_LEARN_RATE)
 
     def _build_model(self):
         model = Sequential(
@@ -31,6 +31,7 @@ class Discriminator(Module):
             LeakyReLU(0.2),
             Dropout(0.2),
             Linear(256, 1),
+            Sigmoid(),
         )
         self._initialize_weights(model)
         return model
@@ -43,26 +44,28 @@ class Discriminator(Module):
                     init.constant_(m.bias.data, 0)
         return model
 
+
     def forward(self, x):
+        env = Env.get_instance()
+        x = x + randn(x.size()).to(env.DEVICE) * 0.1
         x = x.view(-1, self.n_input)
         return self.main(x)
 
-    # Update to Discriminator's custom_train
-    def custom_train(self, real_data, fake_data):
+    def custom_train(self, data_real: Tensor, data_fake: Tensor):
+        curr_batch_size = data_real.size(0)
+        real_label = label_real(curr_batch_size)
+        fake_label = label_fake(curr_batch_size)
         self.optimizer.zero_grad()
-
-        # Calculate the loss for real and fake data
-        real_loss = self(real_data).mean()
-        fake_loss = self(fake_data).mean()
-
-        # WGAN loss
-        loss = fake_loss - real_loss
-
-        loss.backward()
+        output_real = self(data_real)
+        real_smooth_label = self.label_smoothing(real_label)
+        loss_real = self.loss_function(output_real, real_smooth_label)
+        output_fake = self(data_fake)
+        fake_smooth_label = self.label_smoothing(fake_label)
+        loss_fake = self.loss_function(output_fake, fake_smooth_label)
+        loss_real.backward()
+        loss_fake.backward()
         self.optimizer.step()
+        return loss_real + loss_fake
 
-        # Clip weights of discriminator
-        for p in self.parameters():
-            p.data.clamp_(-0.01, 0.01)
-
-        return loss.item()
+    def label_smoothing(self, target, smoothing=0.2):
+        return target * (1 - smoothing) + 0.5 * smoothing

@@ -1,4 +1,4 @@
-from torch import FloatTensor, no_grad, randn, load
+from torch import FloatTensor, no_grad, randn, load, norm, sum, abs
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
@@ -8,6 +8,7 @@ from evaluator.main import evaluateGAN
 from time import time
 from .approaches import EvaluatorModuleApproach
 import os
+from .utils import tensor_to_routes
 
 def gan_cartesian():
     from .utils import load_dataset,checkpoint
@@ -78,16 +79,21 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,
             d_loss_acum += d_loss
         # data_fake are 30x30 images
         data_fake = Gen(create_noise(curr_batch_size))
-        # move_list = output_to_moves(data_fake).tolist()
+        # move_list = data_fake.tolist()
         # evaluatorModules = EvaluatorModuleApproach.get_instance().get_evaluator_modules(
         #     epoch
         # )
         # evaluations = list(map(lambda x: evaluateGAN(x, evaluatorModules), move_list))
-        # all will evaluate 0
+        # # all will evaluate 0
 
-        # downscaled_data_fake = downscale(data_fake)
-        evaluations = [0] * curr_batch_size
-        eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
+        # # downscaled_data_fake = downscale(data_fake)
+        invalid_jumps = jump_penalty(data_fake)
+        normalized_penalty = invalid_jumps / (env.UAV_AMOUNT * env.TOTAL_TIME)
+        eval_tensor = 1 - normalized_penalty
+
+        # evaluations = [0] * curr_batch_size
+        # eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
+
         g_loss = Gen.custom_train(Disc, data_fake, eval_tensor, epoch)
         g_loss_acum += g_loss
         eval_avg = eval_tensor.mean()
@@ -98,3 +104,46 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,
         float(g_loss_acum) / len(route_loader),
         eval_avg,
     )
+
+
+def jump_penalty(tensor):    
+    # Calculate the differences along the sequence_length axis
+    tensor = tensor_to_routes(tensor)
+    # print(tensor)
+    diff = tensor[:, :, 1:, :] - tensor[:, :, :-1, :]
+    
+    # Define the legal moves
+    legal_horizontal_vertical = ((abs(diff[..., 0]) <= 1) & (diff[..., 1] == 0)) | ((diff[..., 0] == 0) & (abs(diff[..., 1]) <= 1))
+    legal_diagonal = (abs(diff[..., 0]) == 1) & (abs(diff[..., 1]) == 1)
+    
+    # Identify illegal moves
+    illegal_moves = ~(legal_horizontal_vertical | legal_diagonal)
+    
+    # Count the number of illegal moves for each batch
+    count_illegal = sum(illegal_moves, dim=(1,2))
+    
+    return count_illegal
+
+# def jump_penalty(batch):
+#     # Assuming batch is a PyTorch tensor with shape [batch_size, num_drones, sequence_length, 2]
+    
+#     # Split the batch into coordinates at time t and t+1
+#     coords_t = batch[:, :, :-1, :]
+#     coords_t1 = batch[:, :, 1:, :]
+    
+#     # Compute differences in coordinates
+#     diff = coords_t1 - coords_t
+    
+#     # Calculate the distances
+#     distances = norm(diff, dim=-1)
+    
+#     # Identify where distance is greater than 1
+#     invalid_jumps = distances > 1
+
+#     # # Now turn the batch_size, num_drones, sequence_length tensor into a batch_size tensor
+#     invalid_jumps = sum(invalid_jumps.int(), dim=(1,2))
+
+    
+#     total_penalty = distances
+    
+#     return invalid_jumps

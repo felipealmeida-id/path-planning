@@ -7,21 +7,21 @@ from multiprocessing import cpu_count
 def evaluateGAN(
     generatedList: list[list[list[int]]], activeModules: list[EvaluatorModules] = None
 ):
-    parsedList = _parseMoves(generatedList)
-    return _evaluate(parsedList, activeModules)
+    # parsedList = _parseMoves(generatedList)
+    return _evaluate(generatedList, activeModules)
 
 
 def _evaluate(
-    grid: list[list[Move]], active_modules: list[EvaluatorModules] | None = None
+    grid: list[list[list[int]]], active_modules: list[EvaluatorModules] | None = None
 ):
-    area, oob_dist, oob_time, battery_evaluation = populate_area_v2(grid)
+    area, oob_dist, oob_time, battery_evaluation, cohesion_evaluation = populate_area_v2(grid)
     constant_evals = {
         EvaluatorModules.OUTOFBOUND: ((oob_dist + oob_time) / 2),
         EvaluatorModules.BATTERY: battery_evaluation,
+        EvaluatorModules.COHESION: cohesion_evaluation,
     }
     evaluators = _determine_evaluators(active_modules, constant_evals)
     results = {metric: evaluate(area, grid) for metric, evaluate in evaluators.items()}
-    # results = _multi_thread_eval(evaluators,area,grid)
     accumulator = 0
     for v in results.values():
         accumulator += v
@@ -42,7 +42,8 @@ def _determine_evaluators(active_modules, already_determined_evals):
 
     evaluators = {}
     for key, value in already_determined_evals.items():
-        evaluators[key] = _constant_return_fun(value)
+        if active_modules is None or key in active_modules:
+            evaluators[key] = _constant_return_fun(value)
     evaluator_mapping = {
         EvaluatorModules.COVERAGE: ("Coverage", evaluate_coverage_area),
         EvaluatorModules.COLLISION: ("Collision", evaluate_drones_collision),

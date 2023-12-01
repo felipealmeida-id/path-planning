@@ -1,6 +1,8 @@
 from collections import Counter
+from enums import ProgramModules
 
-def prepare_directory():
+
+def prepare_directory(module_enum: ProgramModules):
     from env_parser import Env
     env = Env.get_instance()
     root = f"./output/{env.PY_ENV}"
@@ -12,7 +14,8 @@ def prepare_directory():
         f"./inputs/{env.PY_ENV}/",
         f"./output/profiling/{env.PY_ENV}"
     ]
-    delete_existing_results(root)
+    if(module_enum == ProgramModules.PERCEPTRON):
+        delete_existing_results(root+"/gan")
     create_necessary_folders(required_folders)
     unzip_inputs()
 

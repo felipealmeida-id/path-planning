@@ -39,7 +39,7 @@ class WeightApproach:
         elif self.approach == WeightApproachEnum.CONSTANT:
             return self.__constant(epoch)
         else:
-            raise Exception("Invalid approach")
+            raise Exception(f"Invalid approach: {self.approach}")
 
     def __constant(self, epoch):
         evalWeight = 0

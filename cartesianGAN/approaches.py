@@ -43,7 +43,7 @@ class WeightApproach:
             raise Exception(f"Invalid approach: {self.approach}")
 
     def __constant(self, epoch):
-        evalWeight = 0
+        evalWeight = 0.5
         regularWeight = 1 - evalWeight
         return evalWeight, regularWeight
 
@@ -101,7 +101,7 @@ class EvaluatorModuleApproach:
     def __constant(self, epoch):
         from enums import EvaluatorModules
 
-        return [EvaluatorModules.OUTOFBOUND]
+        return [EvaluatorModules.COHESION]
 
     def __linear(self, epoch):
         from enums import EvaluatorModules

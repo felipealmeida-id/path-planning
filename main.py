@@ -17,7 +17,7 @@ module = sys.argv[2]
 module_enum = find_enum_by_value(ProgramModules, module)
 os.environ["MODULE"] = module
 draw_path = sys.argv[3] if module_enum == ProgramModules.DRAWER else ''
-prepare_directory()
+prepare_directory(module_enum)
 switch_dict = {
     ProgramModules.PATHER:pather,
     ProgramModules.PERCEPTRON:gan_perceptron,

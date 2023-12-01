@@ -1,6 +1,7 @@
 from os import listdir,path,mkdir
 from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor,save
 from torch.utils.data import DataLoader, TensorDataset
+import json
 
 from env_parser import Env
 
@@ -21,18 +22,14 @@ def load_dataset():
     root = f'./inputs/{env.PY_ENV}/input'
     if not path.exists(root):
         raise AssertionError('Input directory should exist')
-    subdirs = listdir(root)
-    all_file_routes:list[list[list[float]]] = []
-    for i in subdirs:
-        files = listdir(f"{root}/{i}")
-        for j in files:
-            file = open(f"{root}/{i}/{j}",'r')
-            file_lines = file.readlines()
-            file.close()
-            file_routes = list(map(lambda x : list(map(float, x.split(' '))),file_lines))
-            all_file_routes.append(file_routes)
-    files_tensor_routes = (tensor(all_file_routes,dtype=float32) / 4 - 1).to(env.DEVICE)
-    _labels = torchZeros(len(files_tensor_routes)).to(env.DEVICE)
+    all_file_routes:list[list[list[list[float]]]] = []
+    files = listdir(f"{root}")
+    for j in files:
+        with open(f"{root}/{j}") as j:
+            file_lines = json.load(j)
+            all_file_routes.append(file_lines)
+    files_tensor_routes = (tensor(all_file_routes,dtype=float32) / (env.ENVIRONMENT_X_AXIS/2) - 1).to(env.DEVICE)
+    _labels = torchOnes(len(files_tensor_routes)).to(env.DEVICE)
     files_dataset = TensorDataset(files_tensor_routes,_labels)
     route_loader = DataLoader(files_dataset,env.BATCH_SIZE,shuffle=True)
     return route_loader
@@ -41,14 +38,17 @@ def output_to_moves(route:Tensor) -> Tensor:
     return ((route + 1) * 4).round()
 
 def tensor_to_file(tensor_routes:Tensor,file_name:str):
-    route_samples:list[list[list[float]]] = tensor_routes.tolist()
+    # route_samples:list[list[list[float]]] = tensor_routes.tolist()
+    # for (i,sample) in enumerate(route_samples):
+    #     file = open(f"{file_name}.{i}.txt",'w')
+    #     for route in sample:
+    #         for move in route:
+    #             file.write(f"{str(int(move))} ")
+    #         file.write('\n')
+    #     file.close()
+    route_samples:list[list[list[list[float]]]] = tensor_routes.tolist()
     for (i,sample) in enumerate(route_samples):
-        file = open(f"{file_name}.{i}.txt",'w')
-        for route in sample:
-            for move in route:
-                file.write(f"{str(int(move))} ")
-            file.write('\n')
-        file.close()
+        json.dump(sample,open(f"{file_name}.{i}.txt",'w'))
 
 def save_progress(g_losses:list[float],d_losses:list[float],eval_avgs:list[float],epoch:int):
     from env_parser import Env
@@ -70,5 +70,6 @@ def checkpoint(discriminator,generator,epoch_g_losses, epoch_d_losses, epoch_eva
     save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
     noise = create_noise(3)
     generated_img = generator(noise).to(env.DEVICE).detach()
-    move_tensor = output_to_moves(generated_img)
-    tensor_to_file(move_tensor, f"output/{env.PY_ENV}/gan/generated_imgs/test.{epoch}")
+    scaled_tensor = (generated_img + 1 ) * (env.ENVIRONMENT_X_AXIS/2)
+    scaled_tensor = scaled_tensor.round().long()
+    tensor_to_file(scaled_tensor, f"output/{env.PY_ENV}/gan/generated_imgs/test.{epoch}")

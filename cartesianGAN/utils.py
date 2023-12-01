@@ -57,10 +57,16 @@ def load_dataset():
     
     return route_loader
 
-def tensor_to_file(tensor_routes:Tensor,file_name:str):
+def tensor_to_routes(tensor_routes:Tensor):
     env = Env.get_instance()
     # convert all floats to rounded integers
     tensor_routes = ((tensor_routes + 1) * env.ENVIRONMENT_X_AXIS/2).round().int()
+    return tensor_routes
+
+def tensor_to_file(tensor_routes:Tensor,file_name:str):
+    env = Env.get_instance()
+    # convert all floats to rounded integers
+    tensor_routes = tensor_to_routes(tensor_routes)
     # Array con x samples de array de uavs que tienen un array de posiciones (x,y) que son floats
     route_samples:list[list[list[list[float]]]] = tensor_routes.tolist()
 

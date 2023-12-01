@@ -98,7 +98,13 @@ def distance_to_side(coord,x_lim,y_lim):
     ]
     return max(distances)
 
-def populate_area_v2(positions: list[list[list[int]]]):
+def is_cohesive(current_position, next_position):
+    # Compute the Euclidean distance between the two positions
+    distance = ((next_position[0] - current_position[0]) ** 2 + (next_position[1] - current_position[1]) ** 2) ** 0.5
+    #i want distance to be less than square root of 2
+    return distance <= 1.5
+
+def populate_area_v2(positions):
     from env_parser import Env
     is_high_res = True
     env = Env.get_instance()
@@ -108,30 +114,37 @@ def populate_area_v2(positions: list[list[list[int]]]):
     y_axis = env.HR_ENVIRONMENT_Y_AXIS if is_high_res else env.ENVIRONMENT_Y_AXIS
     uav_max_battery = env.HR_UAV_BATTERY if is_high_res else env.UAV_BATTERY
     uav_charge_time = env.HR_UAV_CHARGE_TIME if is_high_res else env.UAV_CHARGE_TIME
-    origin = (env.START_X_COORD,env.START_Y_COORD)
+    origin = (env.START_X_COORD, env.START_Y_COORD)
     furthest_oob = 0
     oob_time = [0 for _ in range(num_uavs)]
     oo_battery_time = [0 for _ in range(num_uavs)]
+    non_cohesive_moves = 0
     res = [[[] for _ in range(y_axis)] for _ in range(x_axis)]
     for uav in range(num_uavs):
         uav_battery = float(uav_max_battery)
         for time in range(total_time):
-            x_coord,y_coord = positions[uav][time]
-            x_oob = x_coord < 0 or x_coord >  x_axis
+            x_coord, y_coord = positions[uav][time]
+            x_oob = x_coord < 0 or x_coord > x_axis
             y_oob = y_coord < 0 or y_coord > y_axis
-            how_far_oob = distance_to_side((x_coord,y_coord),x_axis,y_axis)
-            furthest_oob = max(furthest_oob,how_far_oob)
+            how_far_oob = distance_to_side((x_coord, y_coord), x_axis, y_axis)
+            furthest_oob = max(furthest_oob, how_far_oob)
+            # We have to be carefull beacuse we look in step further
+            if time + 1 < total_time:
+                next_x_coord, next_y_coord = positions[uav][time + 1]
+                if not is_cohesive((x_coord, y_coord), (next_x_coord, next_y_coord)):
+                    non_cohesive_moves += 1
             if not x_oob and not y_oob:
                 res[int(x_coord)][int(y_coord)].append(time)
             else:
                 oob_time[uav] += 1
             if uav_battery <= 0:
                 oo_battery_time[uav] += 1
-            if (x_coord,y_coord) == origin:
-                uav_battery += 1/uav_charge_time
+            if (x_coord, y_coord) == origin:
+                uav_battery += 1 / uav_charge_time
             else:
                 uav_battery -= 1
     oob_penalization = 1 - sum(oob_time) / (num_uavs * total_time)
     oob_dist_penalization = 1 - furthest_oob / ((total_time + 1) * total_time)
-    oo_battery_penalization = 1 - sum(oo_battery_time)/len(oo_battery_time)/total_time
-    return res, oob_dist_penalization,oob_penalization, oo_battery_penalization
+    oo_battery_penalization = 1 - sum(oo_battery_time) / len(oo_battery_time) / total_time
+    cohesion_penalization = 1 - non_cohesive_moves / (num_uavs * (total_time - 1))  # -1 because of looking one step ahead
+    return res, oob_dist_penalization, oob_penalization, oo_battery_penalization, cohesion_penalization

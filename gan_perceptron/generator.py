@@ -33,7 +33,7 @@ class Generator(Module):
 
     def forward(self, x):
         env = Env.get_instance()
-        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME * 2)
+        return self.main(x).view(-1, env.UAV_AMOUNT, env.TOTAL_TIME , 2)
 
     def custom_train(
         self, discriminator: Discriminator, data_fake, eval_tensor, epoch: int

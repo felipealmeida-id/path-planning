@@ -15,7 +15,7 @@ class Discriminator(Module):
     def __init__(self):
         env = Env.get_instance()
         super(Discriminator, self).__init__()
-        self.n_input = env.UAV_AMOUNT * env.TOTAL_TIME
+        self.n_input = env.UAV_AMOUNT * env.TOTAL_TIME *2
         self.main = self._build_model()
         self.optimizer = Adam(self.parameters(), lr=env.D_LEARN_RATE)
 
