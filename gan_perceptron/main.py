@@ -43,8 +43,8 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
     from .utils import create_noise
 
     def downscale(data_to_downscale):
-        with no_grad():
-            return DSNN(data_to_downscale)
+        DSNN.eval()
+        return DSNN(data_to_downscale)
 
     env = Env.get_instance()
     d_loss_acum = 0
@@ -53,10 +53,13 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
         routes = routes.to(env.DEVICE)
         curr_batch_size = routes.size(0)
         for _ in range(env.K):
+            data_real = routes
             # data_fake are 30x30 routes
             data_fake = Gen(create_noise(curr_batch_size))
-            data_real = routes
-            downscaled_data_fake = downscale(data_fake)
+            denormalized_data_fake = ((data_fake + 1 ) * (env.ENVIRONMENT_X_AXIS/2))
+            downscaled_data_fake = downscale(denormalized_data_fake)
+            downscaled_data_fake = downscaled_data_fake / (env.ENVIRONMENT_X_AXIS/2) - 1
+            # downscaled_data_fake = data_fake
             d_loss = Disc.custom_train(data_real, downscaled_data_fake)
             # d_loss = Disc.custom_train(data_real, data_fake)
             d_loss_acum += d_loss
@@ -68,9 +71,12 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
         # )
         # evaluations = list(map(lambda x: evaluateGAN(x, evaluatorModules), move_list))
         # all will evaluate 0
-        downscaled_data_fake = downscale(data_fake)
+        denormalized_data_fake = ((data_fake + 1 ) * (env.ENVIRONMENT_X_AXIS/2))
+        downscaled_data_fake = downscale(denormalized_data_fake)
+        downscaled_data_fake = downscaled_data_fake / (env.ENVIRONMENT_X_AXIS/2) - 1
         evaluations = [0] * curr_batch_size
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
+        # downscaled_data_fake = data_fake
         g_loss = Gen.custom_train(Disc, downscaled_data_fake, eval_tensor, epoch)
         # g_loss = Gen.custom_train(Disc, data_fake, eval_tensor, epoch)
         g_loss_acum += g_loss

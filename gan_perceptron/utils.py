@@ -70,6 +70,6 @@ def checkpoint(discriminator,generator,epoch_g_losses, epoch_d_losses, epoch_eva
     save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
     noise = create_noise(3)
     generated_img = generator(noise).to(env.DEVICE).detach()
-    scaled_tensor = (generated_img + 1 ) * (env.ENVIRONMENT_X_AXIS/2)
+    scaled_tensor = (generated_img + 1 ) * (env.HR_ENVIRONMENT_X_AXIS/2)
     scaled_tensor = scaled_tensor.round().long()
     tensor_to_file(scaled_tensor, f"output/{env.PY_ENV}/gan/generated_imgs/test.{epoch}")

@@ -10,6 +10,8 @@ from .utils import label_real
 
 from .approaches import WeightApproach
 
+from downscaler.nn_down import NeuralDownscaler
+
 
 class Generator(Module):
     optimizer: Optimizer
@@ -19,6 +21,8 @@ class Generator(Module):
         env = Env.get_instance()
         super(Generator, self).__init__()
         self.noise_dim = env.NOISE_DIMENSION
+        self.downscaler = NeuralDownscaler()
+        self.downscaler.load_pretrained_model()
         self.main = Sequential(
             Linear(self.noise_dim, 256),
             LeakyReLU(0.2),
