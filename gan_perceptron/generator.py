@@ -11,6 +11,7 @@ from .utils import label_real
 from .approaches import WeightApproach
 
 from downscaler.nn_down import NeuralDownscaler
+from .utils import tensor_to_routes
 
 
 class Generator(Module):
@@ -50,7 +51,7 @@ class Generator(Module):
         self.optimizer.zero_grad()
         output = discriminator(data_fake)
         eval_weight, regular_weight = WeightApproach.get_instance().get_weights(epoch)
-        self.loss_fun.adjust_weights(eval_weight, regular_weight)
+        self.loss_fun.adjust_weights(eval_weight, regular_weight) 
         self.loss_fun.set_evaluations(eval_tensor)
         loss = self.loss_fun(output, real_label)
         loss.backward()

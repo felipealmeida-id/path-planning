@@ -42,7 +42,8 @@ class WeightApproach:
             raise Exception(f"Invalid approach: {self.approach}")
 
     def __constant(self, epoch):
-        evalWeight = 0
+        from env_parser import Env
+        evalWeight = Env.get_instance().CONSTANT_EVALUATION_WEIGHT
         regularWeight = 1 - evalWeight
         return evalWeight, regularWeight
 

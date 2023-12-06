@@ -37,6 +37,13 @@ def load_dataset():
 def output_to_moves(route:Tensor) -> Tensor:
     return ((route + 1) * 4).round()
 
+def tensor_to_routes(tensor_routes:Tensor):
+    env = Env.get_instance()
+    # convert all floats to rounded integers
+    tensor_routes = (tensor_routes + 1 ) * (env.HR_ENVIRONMENT_X_AXIS/2)
+    tensor_routes = tensor_routes.round().long()
+    return tensor_routes
+
 def tensor_to_file(tensor_routes:Tensor,file_name:str):
     # route_samples:list[list[list[float]]] = tensor_routes.tolist()
     # for (i,sample) in enumerate(route_samples):

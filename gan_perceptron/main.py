@@ -1,4 +1,5 @@
 from torch import FloatTensor, no_grad, randn
+import torch
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
@@ -7,6 +8,7 @@ from downscaler.nn_down import NeuralDownscaler
 from evaluator.main import evaluateGAN
 from time import time
 from .approaches import EvaluatorModuleApproach
+from .utils import tensor_to_routes
 
 
 def gan_perceptron():
@@ -74,7 +76,9 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
         denormalized_data_fake = ((data_fake + 1 ) * (env.ENVIRONMENT_X_AXIS/2))
         downscaled_data_fake = downscale(denormalized_data_fake)
         downscaled_data_fake = downscaled_data_fake / (env.ENVIRONMENT_X_AXIS/2) - 1
-        evaluations = [0] * curr_batch_size
+        # evaluations = [0] * curr_batch_size
+        jump_penalty_tensor = jump_penalty(downscaled_data_fake)
+        evaluations = jump_penalty_tensor.tolist()
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         # downscaled_data_fake = data_fake
         g_loss = Gen.custom_train(Disc, downscaled_data_fake, eval_tensor, epoch)
@@ -88,3 +92,28 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
         float(g_loss_acum) / len(route_loader),
         eval_avg,
     )
+
+
+def jump_penalty(tensor):    
+    env = Env.get_instance()
+    # Copy tensor to avoid changing the original
+    tensor = tensor.clone()
+    # Calculate the differences along the sequence_length axis
+    tensor = tensor_to_routes(tensor)
+    # print(tensor)
+    diff = tensor[:, :, 1:, :] - tensor[:, :, :-1, :]
+    
+    # Define the legal moves
+    legal_horizontal_vertical = ((torch.abs(diff[..., 0]) <= 1) & (diff[..., 1] == 0)) | ((diff[..., 0] == 0) & (torch.abs(diff[..., 1]) <= 1))
+    legal_diagonal = (torch.abs(diff[..., 0]) == 1) & (torch.abs(diff[..., 1]) == 1)
+    
+    # Identify illegal moves
+    illegal_moves = ~(legal_horizontal_vertical | legal_diagonal)
+    
+    # Count the number of illegal moves for each batch
+    count_illegal = torch.sum(illegal_moves, dim=(1,2))
+
+    # Now 0 is the worst and 1 is the best
+    count_illegal = 1 - count_illegal / (env.HR_TOTAL_TIME - 1)
+    
+    return count_illegal
