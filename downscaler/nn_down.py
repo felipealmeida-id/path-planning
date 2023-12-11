@@ -18,6 +18,8 @@ class NeuralDownscaler(Module):
         env = Env.get_instance()
         pretrained_weights = load(env.TRAINED_DOWNSCALER_PATH)
         self.load_state_dict(pretrained_weights)
+        for param in self.parameters():
+            param.requires_grad = False
 
     def forward(self, x):
         from env_parser import Env
