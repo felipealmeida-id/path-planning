@@ -21,7 +21,6 @@ def create_noise(size:int):
     return randn(size,env.NOISE_DIMENSION).to(env.DEVICE)
 
 def process_file(entry):
-    # This function processes a single file and returns the loaded data
     if entry.is_file():
         with open(entry.path, 'r') as file_obj:
             return load(file_obj)
@@ -31,35 +30,23 @@ def process_file(entry):
 def load_dataset():
     env = Env.get_instance()
     root = f'./inputs/{env.PY_ENV}/input'
-    
     if not path.exists(root):
         raise AssertionError('Input directory should exist')
-    
     all_file_routes = []
-    
-    # Using ThreadPoolExecutor to process files in parallel
     with ThreadPoolExecutor() as executor:
-        # map returns results in the order the calls were started (which is what we want here for tqdm)
         results = list(tqdm(executor.map(process_file, list(scandir(root))), total=len(list(scandir(root))), desc="Processing files"))
-        
-    # Append non-None results to all_file_routes
     all_file_routes.extend(filter(None, results))
-
-    # Convert list to tensor
     files_tensor_routes = tensor(all_file_routes, dtype=float32).to(env.DEVICE)
-
-    # Normalize data only if necessary
-    if not hasattr(env, 'NO_NORMALIZATION') or not env.NO_NORMALIZATION:
-        files_tensor_routes = files_tensor_routes / (env.ENVIRONMENT_X_AXIS / 2) - 1
-    
+    if not env.NO_NORMALIZATION:
+        mean = files_tensor_routes.mean(dim=(0, 1), keepdim=True)
+        std = files_tensor_routes.std(dim=(0, 1), keepdim=True)
+        files_tensor_routes = files_tensor_routes - mean / std
     files_dataset = TensorDataset(files_tensor_routes)
     route_loader = DataLoader(files_dataset, env.BATCH_SIZE, shuffle=True)
-    
     return route_loader
 
 def tensor_to_routes(tensor_routes:Tensor):
     env = Env.get_instance()
-    # convert all floats to rounded integers
     tensor_routes = ((tensor_routes + 1) * env.ENVIRONMENT_X_AXIS/2).round().int()
     return tensor_routes
 
