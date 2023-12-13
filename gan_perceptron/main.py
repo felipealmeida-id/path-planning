@@ -51,6 +51,7 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
     env = Env.get_instance()
     d_loss_acum = 0
     g_loss_acum = 0
+    eval_avg_acum = 0
     for _, (routes, _) in enumerate(route_loader):
         routes = routes.to(env.DEVICE)
         curr_batch_size = routes.size(0)
@@ -82,52 +83,39 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
 
         # evaluations = [0] * curr_batch_size
         # downscaled_data_fake = data_fake
-        jump_penalty_tensor = evaluar_trayectorias(downscaled_data_fake)
+        jump_penalty_tensor = jump_counter(downscaled_data_fake)
         evaluations = jump_penalty_tensor.tolist()
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         g_loss = Gen.custom_train(Disc, downscaled_data_fake, eval_tensor, epoch)
         # g_loss = Gen.custom_train(Disc, data_fake, eval_tensor, epoch)
         g_loss_acum += g_loss
         eval_avg = eval_tensor.mean()
+        eval_avg_acum += eval_avg
         eval_tensor.detach()
         del eval_tensor
     return (
         float(d_loss_acum) / len(route_loader) / env.K,
         float(g_loss_acum) / len(route_loader),
-        eval_avg,
+        float(eval_avg_acum) / len(route_loader),
     )
 
 
-def evaluar_trayectorias(trayectorias_batch):
-    puntuacion_maxima_por_trayectoria = 100
-    penalizacion_por_salto = 5  # Penalización ajustable
+def jump_counter(tensor):
+    env = Env.get_instance()
+    # Clonamos el tensor para evitar modificar el original
+    tensor = tensor.clone().detach()
+    # Normalizamos
+    tensor = (tensor + 1 ) * (env.HR_ENVIRONMENT_X_AXIS/2)
+    # Calcula las diferencias entre puntos consecutivos en cada trayectoria
+    diferencias = torch.abs(tensor[:, :, 1:] - tensor[:, :, :-1])
 
-    # Inicializar un tensor para las puntuaciones de cada lote
-    puntuaciones = torch.zeros(trayectorias_batch.shape[0], dtype=torch.float)
+    # Calcula los saltos (diferencia > 1) y suma su magnitud, menos 1 (para que un salto de 2 cuente como 1, de 3 como 2, etc.)
+    saltos = torch.clamp(diferencias - 1, min=0)
 
-    for i in range(trayectorias_batch.shape[0]):  # Itera sobre cada lote
-        puntuacion_lote = 0
-        for j in range(trayectorias_batch.shape[1]):  # Itera sobre cada UAV
-            trayectoria = trayectorias_batch[i, j].float()
+    # Suma los saltos de ambos UAVs en cada trayectoria
+    saltos_totales = torch.sum(saltos, dim=(2, 3)).sum(dim=1)
 
-            # Calcula diferencias entre puntos consecutivos
-            diferencias = torch.abs(torch.diff(trayectoria, dim=0))
-
-            # Verifica si hay algún salto donde la diferencia en alguna coordenada sea mayor a 1
-            saltos = diferencias > 1
-            penalizaciones = saltos.sum() * penalizacion_por_salto
-
-            # Calcula la puntuación para esta trayectoria
-            puntuacion = puntuacion_maxima_por_trayectoria - penalizaciones
-            puntuacion = torch.clamp(puntuacion, min=0)
-
-            puntuacion_lote += puntuacion
-
-        # Normaliza la puntuación del lote
-        puntuacion_normalizada = (puntuacion_lote / (trayectorias_batch.shape[1] * puntuacion_maxima_por_trayectoria)) * 100
-        puntuaciones[i] = puntuacion_normalizada
-
-    return puntuaciones/100
+    return saltos_totales/2000
 
 
 def jump_penalty(tensorParam):    
