@@ -21,8 +21,9 @@ class CustomLoss(Module):
         env = Env.get_instance()
         loss_fun = BCELoss()
         reg = self.regular_weight * loss_fun(predictions, targets)
-        evaluation = self.eval_weight * loss_fun(
-            self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE)
-        )
+        # evaluation = self.eval_weight * loss_fun(
+        #     self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE)
+        # )
+        evaluation = self.eval_weight
         total = reg + evaluation
         return total

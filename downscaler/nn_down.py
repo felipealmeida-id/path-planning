@@ -9,7 +9,6 @@ class NeuralDownscaler(Module):
         super(NeuralDownscaler, self).__init__()
         self.seq = Sequential(
             Linear(2 * env.HR_TOTAL_TIME,1024),
-            ReLU(),
             Linear(1024,2 * env.TOTAL_TIME)
         )
 
