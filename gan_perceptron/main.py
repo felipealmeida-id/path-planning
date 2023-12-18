@@ -105,7 +105,7 @@ def jump_counter(tensor):
     # Clonamos el tensor para evitar modificar el original
     tensor = tensor.clone().detach()
     # Normalizamos
-    tensor = (tensor + 1 ) * (env.HR_ENVIRONMENT_X_AXIS/2)
+    tensor = (tensor + 1 ) * (env.ENVIRONMENT_X_AXIS/2)
     # Calcula las diferencias entre puntos consecutivos en cada trayectoria
     diferencias = torch.abs(tensor[:, :, 1:] - tensor[:, :, :-1])
 

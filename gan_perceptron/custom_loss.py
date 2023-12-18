@@ -1,5 +1,5 @@
 from torch import ones
-from torch.nn import BCELoss, Module
+from torch.nn import BCELoss, Module, MSELoss
 from env_parser import Env
 
 
@@ -20,10 +20,10 @@ class CustomLoss(Module):
     def forward(self, predictions, targets):
         env = Env.get_instance()
         loss_fun = BCELoss()
-        reg = self.regular_weight * loss_fun(predictions, targets)
+        reg = loss_fun(predictions, targets)
         # evaluation = self.eval_weight * loss_fun(
         #     self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE)
         # )
-        evaluation = self.eval_weight
+        evaluation = MSELoss()(self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE))
         total = reg + evaluation
         return total
