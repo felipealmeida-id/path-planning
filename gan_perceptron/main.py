@@ -3,7 +3,6 @@ import torch
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
-from downscaler.downscaler import Downscaler
 from downscaler.nn_down import NeuralDownscaler
 from evaluator.main import evaluateGAN
 from time import time
@@ -24,17 +23,26 @@ def gan_perceptron():
     downscaler_nn = NeuralDownscaler().to(env.DEVICE)
     # downscaler_nn.custom_train(randn((800,)).to(env.DEVICE),randn((400,)).to(env.DEVICE))
     downscaler_nn.load_pretrained_model()
+    G_optimizer = torch.optim.Adam(generator.parameters(), lr=env.G_LEARN_RATE)
+    D_optimizer = torch.optim.Adam(discriminator.parameters(), lr=env.D_LEARN_RATE)
+    # Inicialización del scheduler
+    Gscheduler = torch.optim.lr_scheduler.StepLR(G_optimizer, step_size=200, gamma=0.1)
+    Dscheduler = torch.optim.lr_scheduler.StepLR(D_optimizer, step_size=200, gamma=0.1)
+    generator.set_optimizer(G_optimizer)
+    discriminator.set_optimizer(D_optimizer)
     for epoch in range(env.EPOCHS):
         start = time()
         d_loss, g_loss, eval_avg = train_epoch(
             epoch, route_loader, discriminator, generator,downscaler_nn
         )
+        Gscheduler.step()
+        Dscheduler.step()
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)
         end = time()
         print(
-            f"Epoch {epoch} | D loss: {d_loss} | G loss: {g_loss} | Eval avg: {eval_avg} | Time: {end - start}"
+            f"Epoch {epoch} | G_LR: {G_optimizer.param_groups[0]['lr']} | D loss: {d_loss} | G loss: {g_loss} | Eval avg: {eval_avg} | Time: {end - start}"
         )
         if epoch % 10 == 0:
             checkpoint(discriminator,generator,epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)

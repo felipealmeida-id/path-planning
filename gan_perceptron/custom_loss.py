@@ -1,4 +1,4 @@
-from torch import ones
+from torch import ones, zeros
 from torch.nn import BCELoss, Module, MSELoss
 from env_parser import Env
 
@@ -24,6 +24,7 @@ class CustomLoss(Module):
         # evaluation = self.eval_weight * loss_fun(
         #     self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE)
         # )
-        evaluation = MSELoss()(self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE))
+        evaluation = MSELoss()(self.evaluations, zeros(self.evaluations.size(0)).to(env.DEVICE))
+        print("evaluation", evaluation)
         total = reg + evaluation
         return total

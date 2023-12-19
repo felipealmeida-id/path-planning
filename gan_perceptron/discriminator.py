@@ -19,6 +19,9 @@ class Discriminator(Module):
         self.main = self._build_model()
         self.optimizer = Adam(self.parameters(), lr=env.D_LEARN_RATE)
 
+    def set_optimizer(self, optimizer: Optimizer):
+        self.optimizer = optimizer
+
     def _build_model(self):
         model = Sequential(
             Linear(self.n_input, 1024),

@@ -61,7 +61,6 @@ class Env:
             ProgramModules.DRAWER: self._parse_env_pather,
             ProgramModules.PATHER: self._parse_env_pather,
             ProgramModules.PERCEPTRON: self._parse_env_gan,
-            ProgramModules.CARTESIAN: self._parse_env_gan,
         }
         switch_dict[module_enum]()
         self.BATCH_SIZE = int(getenv("BATCH_SIZE"))

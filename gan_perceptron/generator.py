@@ -35,7 +35,9 @@ class Generator(Module):
             Linear(1024, env.UAV_AMOUNT * (env.HR_TOTAL_TIME * 2)),
             Tanh(),
         )
-        self.optimizer = Adam(self.parameters(), lr=env.G_LEARN_RATE)
+
+    def set_optimizer(self, optimizer: Optimizer):
+        self.optimizer = optimizer
 
     def forward(self, x):
         env = Env.get_instance()
