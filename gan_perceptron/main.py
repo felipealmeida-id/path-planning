@@ -35,8 +35,8 @@ def gan_perceptron():
         d_loss, g_loss, eval_avg = train_epoch(
             epoch, route_loader, discriminator, generator,downscaler_nn
         )
-        Gscheduler.step()
-        Dscheduler.step()
+        # Gscheduler.step()
+        # Dscheduler.step()
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)
@@ -123,7 +123,7 @@ def jump_counter(tensor):
     # Suma los saltos de ambos UAVs en cada trayectoria
     saltos_totales = torch.sum(saltos, dim=(2, 3)).sum(dim=1)
 
-    return saltos_totales/2000
+    return saltos_totales/1000
 
 
 def jump_penalty(tensorParam):    
