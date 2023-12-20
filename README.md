@@ -12,7 +12,7 @@ envs/: Los distintos ambientes para entrenar a la red
 gan_perceptron:/ Lo que compete a la red neuronal
 
 ## Requisitos del Sistema
-Asegúrate de tener instaladas las siguientes bibliotecas y dependencias antes de ejecutar el código:
+En el repositorio se encuentra un archivo requirements.txt el cual puede ser usado para crear el mismo ambiente en el cual está desarrollado. Para utilizar el archivo se debe ejecutar el siguiente comando:
 ```bash
 conda create --name <env> --file requirements.txt
 ```
