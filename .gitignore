@@ -10,5 +10,5 @@ test
 downscaler/NN_downscaler/primercommit/test/
 
 *.txt
-
+!requirements.txt
 pruebaRenzo/out/

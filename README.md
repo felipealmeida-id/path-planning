@@ -13,26 +13,20 @@ gan_perceptron:/ Lo que compete a la red neuronal
 
 ## Requisitos del Sistema
 Asegúrate de tener instaladas las siguientes bibliotecas y dependencias antes de ejecutar el código:
-
 ```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+conda create --name <env> --file requirements.txt
 ```
-O bien utilizarlo desde la CPU
-```bash
-pip3 install torch torchvision torchaudio
-```
-
 ## Uso
 Para llevar a cabo entrenamiento de la red se utiliza el comando
 ```bash
 python main.py newCartesian gan
 ```
 Esto resultara en estados de la red, y salidas del generador guardadas en las carpetas 
-1. `output/newCartesian/generator` 
-2. `output/newCartesian/discriminator`
-3. `output/newCartesian/generated_imgs`
+1. `output/newCartesian/gan/generator` 
+2. `output/newCartesian/gan/discriminator`
+3. `output/newCartesian/gan/generated_imgs`
 
-Para visualizar una trayectoria lo recomndado es copiar del archivo encontrado en la carpeta `output/newCartesian/generated_imgs` la trayectoria, y luego copiarla en el archivo `cartesianDraw.py`. Con este comando se dibujara la trayectoria:
+Para visualizar una trayectoria lo recomndado es copiar del archivo encontrado en la carpeta `output/newCartesian/gan/generated_imgs` la trayectoria, y luego copiarla en el archivo `cartesianDraw.py`. Con este comando se dibujara la trayectoria:
 ```bash
 python cartesianDraw.py
 ``` 
