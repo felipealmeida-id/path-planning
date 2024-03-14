@@ -12,6 +12,7 @@ from .coord import Coord
 class Yahera(MoveHeuristic):
     targeting:dict[int,Point_Of_Interest] = {}
     targetted_points:set[Point_Of_Interest] = set()
+    visited:dict[(int,int),int] = {}
 
     def __init__(self) -> None:
         super().__init__()
@@ -25,11 +26,14 @@ class Yahera(MoveHeuristic):
         uav_index:int = kwargs.get('uav_index')
         time:int = kwargs.get('time')
         points_of_interest:list[Point_Of_Interest] = kwargs.get("points_of_interest")
+        self.visited[(uav.position.x, uav.position.y)] = self.visited.get((uav.position.x, uav.position.y), 0) + 1
         uav_current_target = self.choose_target(uav_index,time,points_of_interest)
         uav_possible_moves = uav.possible_moves()
         uav_possible_moves = self._filterMoves(uav_possible_moves, uav.position)
         if uav_current_target is None:
             return choice(uav_possible_moves)
+            selected_move = uav_possible_moves[0]
+            return selected_move
         path = list(self.traverser.astar(uav.position.toTuple(), uav_current_target.position.toTuple()))
         next_point = Coord(path[1][0], path[1][1])
         uav_target_delta = next_point - uav.position
@@ -53,6 +57,9 @@ class Yahera(MoveHeuristic):
     def _filterMoves(self, posibleMoves, current_pos:Coord):
         # Extraemos los movimientos que no estan sobre la trayectoria
         uav_possible_moves = [move for move in posibleMoves if self.map[current_pos.x + move_delta(move)[0]][current_pos.y + move_delta(move)[1]] == 1]
+        # Ordenamos los movimientos por la cantidad de veces que se ha visitado el punto
+        uav_possible_moves = sorted(uav_possible_moves, key=lambda move: self.visited.get((current_pos.x + move_delta(move)[0], current_pos.y + move_delta(move)[1])
+            , 0))
         return uav_possible_moves
 
     
