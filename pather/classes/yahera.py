@@ -20,33 +20,23 @@ class Yahera(MoveHeuristic):
         self.traverser = PathTraverser(self.map)
 
     def get_move(self,**kwargs) -> Move:
-        # Parse arguments
         check_parameters(kwargs,ardemisa_move_params)
         uav:Uav = kwargs.get('uav')
         uav_index:int = kwargs.get('uav_index')
         time:int = kwargs.get('time')
         points_of_interest:list[Point_Of_Interest] = kwargs.get("points_of_interest")
-        print(f"-------------------UAV {uav_index} at time {time}-------------------")
-
         uav_current_target = self.choose_target(uav_index,time,points_of_interest)
         uav_possible_moves = uav.possible_moves()
-        print("Im on:", uav.position.toTuple())
-        print("Possible moves:", uav_possible_moves)
         uav_possible_moves = self._filterMoves(uav_possible_moves, uav.position)
-        print("Filtered moves:", uav_possible_moves)
         if uav_current_target is None:
             return choice(uav_possible_moves)
-        # if uav has target, move towards it
-        print("I want to go to:", uav_current_target.position.toTuple())
         path = list(self.traverser.astar(uav.position.toTuple(), uav_current_target.position.toTuple()))
         next_point = Coord(path[1][0], path[1][1])
-
         uav_target_delta = next_point - uav.position
         chosen_move = delta_to_move(uav_target_delta)
         if uav.position.copy().apply_delta(move_delta(chosen_move)) == uav_current_target.position:
              self.targetted_points.remove(uav_current_target)
              self.targeting.pop(uav_index)
-        print("I will move:", chosen_move)
         return chosen_move
 
     def choose_target(self,uav_index:int,time:int,points_of_interest:list[Point_Of_Interest]):

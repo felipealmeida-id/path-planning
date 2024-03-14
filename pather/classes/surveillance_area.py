@@ -56,7 +56,6 @@ class SurveillanceArea:
                 move = Move.STAY
             else:
                 move = self.heuristic.get_move(uav=uav,time=self.time_elapsed,uav_index=uav_index,points_of_interest=self.points_of_interest, moves=moves)
-            # print("SURV", move)
             if(move is None):
                 resulting_moves[0] = None
                 return resulting_moves

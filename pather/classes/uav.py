@@ -21,8 +21,8 @@ class Uav:
         self.current_charge = 0
         self.inbound_evaluation = 1
 
-    def get_effective_battery(self):
-        return 0 if self.charging else (self.battery - self.distance_to_base())
+    def get_effective_battery(self,aStar):
+        return 0 if self.charging else (self.battery - self.distance_to_base(aStar))
 
     def move(self,move:Move, aStar = False):
         from .surveillance_area import SurveillanceArea
@@ -35,9 +35,9 @@ class Uav:
                 self.current_charge = 0
                 self.battery = self.max_battery
             return self.position,Move.STAY
-        actual_move = move if self.get_effective_battery() > 0 else self.get_move_to_base(aStar)
+        actual_move = move if self.get_effective_battery(aStar) > 0 else self.get_move_to_base(aStar)
         self.apply_move(actual_move)
-        if (self.position == environment.start) and (self.get_effective_battery() < 2):
+        if (self.position == environment.start) and (self.get_effective_battery(aStar) < 2):
             self.charging = True
         return self.position,actual_move
     
@@ -84,6 +84,7 @@ class Uav:
             from ..utils.aStar import PathTraverser
             traverser = PathTraverser(env.MAP)
             path = list(traverser.astar(self.position.toTuple(), SA.start.toTuple()))
+            print(len(path))
             return len(path)
         return distance(self.position,SA.start) + 1
 
