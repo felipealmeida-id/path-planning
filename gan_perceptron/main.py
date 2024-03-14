@@ -26,8 +26,8 @@ def gan_perceptron():
     G_optimizer = torch.optim.Adam(generator.parameters(), lr=env.G_LEARN_RATE)
     D_optimizer = torch.optim.Adam(discriminator.parameters(), lr=env.D_LEARN_RATE)
     # Inicialización del scheduler
-    Gscheduler = torch.optim.lr_scheduler.StepLR(G_optimizer, step_size=200, gamma=0.1)
-    Dscheduler = torch.optim.lr_scheduler.StepLR(D_optimizer, step_size=200, gamma=0.1)
+    Gscheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(G_optimizer, patience=50, factor=0.5, verbose=True)
+    Dscheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(D_optimizer, patience=50, factor=0.5, verbose=True)
     generator.set_optimizer(G_optimizer)
     discriminator.set_optimizer(D_optimizer)
     for epoch in range(env.EPOCHS):
@@ -35,8 +35,8 @@ def gan_perceptron():
         d_loss, g_loss, eval_avg = train_epoch(
             epoch, route_loader, discriminator, generator,downscaler_nn
         )
-        # Gscheduler.step()
-        # Dscheduler.step()
+        # Gscheduler.step(g_loss)
+        # Dscheduler.step(d_loss)
         epoch_g_losses.append(g_loss)
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)

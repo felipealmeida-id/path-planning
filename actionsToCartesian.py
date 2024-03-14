@@ -39,14 +39,14 @@ def process_file(file_path,i):
         routes = list(map(lambda x: list(map(int,x.removesuffix('\n').split(' '))),lines))
         cartesian_route = delta_to_cartesian(move_to_delta(routes))
         string_route = json_dump(cartesian_route)
-    with open(f"inputs/newCartesian/input/{i}.json",'w') as out_file:
+    with open(f"inputs/hr/input/{i}.json",'w') as out_file:
         out_file.write(string_route)
 
 def get_all_files(directory):
     # Recursively list all files in the directory and its subdirectories
     return [os.path.join(dp, f) for dp, dn, filenames in os.walk(directory) for f in filenames]
 
-directory = 'output/newCartesian/pather/generated_paths'
+directory = 'output/hr/pather/generated_paths'
 all_files = get_all_files(directory)
 
 with tqdm(total=len(all_files), desc="Processing Files") as pbar:

@@ -25,6 +25,5 @@ class CustomLoss(Module):
         #     self.evaluations, ones(self.evaluations.size(0)).to(env.DEVICE)
         # )
         evaluation = MSELoss()(self.evaluations, zeros(self.evaluations.size(0)).to(env.DEVICE))
-        print("evaluation", evaluation)
         total = reg + evaluation
         return total

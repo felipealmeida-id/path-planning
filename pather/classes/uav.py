@@ -24,7 +24,7 @@ class Uav:
     def get_effective_battery(self):
         return 0 if self.charging else (self.battery - self.distance_to_base())
 
-    def move(self,move:Move):
+    def move(self,move:Move, aStar = False):
         from .surveillance_area import SurveillanceArea
         env = Env.get_instance()
         environment = SurveillanceArea.get_instance()
@@ -35,7 +35,7 @@ class Uav:
                 self.current_charge = 0
                 self.battery = self.max_battery
             return self.position,Move.STAY
-        actual_move = move if self.get_effective_battery() > 0 else self.get_move_to_base()
+        actual_move = move if self.get_effective_battery() > 0 else self.get_move_to_base(aStar)
         self.apply_move(actual_move)
         if (self.position == environment.start) and (self.get_effective_battery() < 2):
             self.charging = True
@@ -57,21 +57,35 @@ class Uav:
 
     def possible_moves(self):
         from .surveillance_area import SurveillanceArea
-        env = SurveillanceArea.get_instance()
+        SA = SurveillanceArea.get_instance()
         end_positions = [(self.position.copy().apply_delta(move_delta(move)),move) for move in all_moves]
-        filtered_moves = filter(lambda pos_move:env.is_inbound(pos_move[0]),end_positions)
+        filtered_moves = filter(lambda pos_move:SA.is_inbound(pos_move[0]),end_positions)
         return list(map(lambda pos_move:pos_move[1],filtered_moves))
         
-    def get_move_to_base(self):
+    def get_move_to_base(self, aStar = False):
         from .surveillance_area import SurveillanceArea
-        env = SurveillanceArea.get_instance()
-        delta = env.start - self.position
+        SA = SurveillanceArea.get_instance()
+        env = Env.get_instance()
+        if aStar:
+            from ..utils.aStar import PathTraverser
+            traverser = PathTraverser(env.MAP)
+            path = list(traverser.astar(self.position.toTuple(), SA.start.toTuple()))
+            next_point = Coord(path[1][0], path[1][1])
+            delta = next_point - self.position
+            return delta_to_move(delta)
+        delta = SA.start - self.position
         return delta_to_move(delta)
 
-    def distance_to_base(self):
+    def distance_to_base(self, aStar = False):
         from .surveillance_area import SurveillanceArea
-        env = SurveillanceArea.get_instance()
-        return distance(self.position,env.start) + 1
+        SA = SurveillanceArea.get_instance()
+        env = Env.get_instance()
+        if aStar:
+            from ..utils.aStar import PathTraverser
+            traverser = PathTraverser(env.MAP)
+            path = list(traverser.astar(self.position.toTuple(), SA.start.toTuple()))
+            return len(path)
+        return distance(self.position,SA.start) + 1
 
     def __repr__(self):
         return f"""UAV

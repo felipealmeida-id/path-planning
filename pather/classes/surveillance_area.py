@@ -4,9 +4,11 @@ from .uav import Uav
 from .heuristic import MoveHeuristic
 from .ardemisa import Ardemisa
 from .nefesto import Nefesto
+from .yahera import Yahera
 from .point_of_interest import Point_Of_Interest
 from enums import Move
 from env_parser import Env
+
 
 class SurveillanceArea:
     __instance = None
@@ -17,7 +19,7 @@ class SurveillanceArea:
     total_time:int
     time_elapsed:int
 
-    def __init__(self) -> None:
+    def __init__(self, aStar) -> None:
         env = Env.get_instance()
         self.size = Coord(env.ENVIRONMENT_X_AXIS,env.ENVIRONMENT_Y_AXIS)
         self.start = Coord(env.START_X_COORD,env.START_Y_COORD)
@@ -25,14 +27,15 @@ class SurveillanceArea:
         self.obstacles = [Obstacle(Coord(x,y)) for (x,y) in env.OBSTACLES_COORDS]
         pois_times_and_coords = zip(env.POINTS_OF_INTEREST_VISIT_TIMES,env.POINTS_OF_INTEREST_COORDS)
         self.points_of_interest = [Point_Of_Interest(visit_time,Coord(x,y)) for visit_time,(x,y) in pois_times_and_coords]
-        self.heuristic = Ardemisa()
+        self.heuristic = Yahera()
         self.total_time = env.TOTAL_TIME
         self.time_elapsed = 0
+        self.aStar = aStar
     
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls, aStar = False):
         if not cls.__instance:
-            cls.__instance = SurveillanceArea()
+            cls.__instance = SurveillanceArea(aStar)
         return cls.__instance
     
     def is_inbound(self,coord:Coord):
@@ -44,7 +47,7 @@ class SurveillanceArea:
         collisions = [coord in obs.sections for obs in self.obstacles]
         return any(collisions)
     
-    def iterate(self):
+    def iterate(self, moves = []):
         resulting_moves:dict[int,Move] = {}
         surveyed_coords = []
         enumeration_uavs = enumerate(self.uavs)
@@ -52,8 +55,12 @@ class SurveillanceArea:
             if uav.charging:
                 move = Move.STAY
             else:
-                move = self.heuristic.get_move(uav=uav,time=self.time_elapsed,uav_index=uav_index,points_of_interest=self.points_of_interest)
-            surveying,performed_move = uav.move(move)
+                move = self.heuristic.get_move(uav=uav,time=self.time_elapsed,uav_index=uav_index,points_of_interest=self.points_of_interest, moves=moves)
+            # print("SURV", move)
+            if(move is None):
+                resulting_moves[0] = None
+                return resulting_moves
+            surveying,performed_move = uav.move(move,self.aStar)
             surveyed_coords.append(surveying)
             resulting_moves[uav_index] = performed_move
         for poi in self.points_of_interest:

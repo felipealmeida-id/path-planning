@@ -7,7 +7,10 @@ class Coord:
         self.x = self.x+delta[0]
         self.y = self.y+delta[1]
         return self
-
+    
+    def toTuple(self):
+        return (self.x,self.y)
+        
     def copy(self):
         return Coord(self.x,self.y)
 
@@ -28,3 +31,6 @@ class Coord:
     
     def __repr__(self) -> str:
         return f"({self.x},{self.y})"
+    
+    def __hash__(self):
+        return hash((self.x,self.y))

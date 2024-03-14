@@ -2,7 +2,7 @@ import sys
 import random
 import os
 from torch import manual_seed
-from pather.main import pather
+from pather.maindos import pather
 from gan_perceptron.main import gan_perceptron
 from drawer.main import draw_route
 from utilities import prepare_directory,find_enum_by_value

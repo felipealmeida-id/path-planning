@@ -4,6 +4,7 @@ from .uav import Uav
 from ..utils.constants import nefesto_move_params
 from ..utils.utilities import check_parameters
 
+#Random heuristic
 class Nefesto(MoveHeuristic):
     def get_move(self,**kwargs):
         check_parameters(kwargs,nefesto_move_params)

@@ -26,17 +26,17 @@ class Discriminator(Module):
         model = Sequential(
             Linear(self.n_input, 1024),
             LeakyReLU(0.2),
-            Dropout(0.4),
+            Dropout(0.2),
             Linear(1024, 512),
             LeakyReLU(0.2),
-            Dropout(0.4),
+            Dropout(0.2),
             Linear(512, 256),
             LeakyReLU(0.2),
-            Dropout(0.4),
+            Dropout(0.2),
             Linear(256, 1),
             Sigmoid(),
         )
-        self._initialize_weights(model)
+        # self._initialize_weights(model)
         return model
 
     def _initialize_weights(self, model):
@@ -69,5 +69,5 @@ class Discriminator(Module):
         self.optimizer.step()
         return loss_real + loss_fake
 
-    def label_smoothing(self, target, smoothing=0.2):
+    def label_smoothing(self, target, smoothing=0.3):
         return target * (1 - smoothing) + 0.5 * smoothing

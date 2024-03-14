@@ -8,6 +8,7 @@ from utilities import find_enum_by_value
 from enums import ProgramModules
 from gan_perceptron.approaches import WeightApproachEnum, EvaluatorModuleApproachEnum
 
+import numpy as np
 
 class Env:
     __instance = None
@@ -45,6 +46,7 @@ class Env:
     DATASET: str
     CONSTANT_EVALUATION_WEIGHT:float
     TRAINED_DOWNSCALER_PATH:str
+    MAP: list[list[int]]
 
     def __init__(self):
         # Check which environment to load
@@ -109,6 +111,7 @@ class Env:
         self.DATASET = getenv("DATASET")
         self.CONSTANT_EVALUATION_WEIGHT = float(getenv("CONSTANT_EVALUATION_WEIGHT"))
         self.TRAINED_DOWNSCALER_PATH = getenv("TRAINED_DOWNSCALER_PATH")
+        self.MAP = np.transpose(loads(getenv("MAP")))
 
     @classmethod
     def get_instance(self):

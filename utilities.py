@@ -17,7 +17,7 @@ def prepare_directory(module_enum: ProgramModules):
     if(module_enum == ProgramModules.PERCEPTRON):
         delete_existing_results(root+"/gan")
     create_necessary_folders(required_folders)
-    unzip_inputs()
+    # unzip_inputs()
 
 def unzip_inputs():
     from zipfile import ZipFile
