@@ -3,12 +3,18 @@ from utilities import get_duplicates
 
 def evaluate_coverage_area(*args) -> float:
     from env_parser import Env
+
     area:list[list[list[int]]] = args[0]
+    res = args[1]
+
     env = Env.get_instance()
-    numberOfSquares = env.HR_ENVIRONMENT_X_AXIS * env.HR_ENVIRONMENT_Y_AXIS
+    x_axis = env.HR_ENVIRONMENT_X_AXIS if res == "HIGH" else env.ENVIRONMENT_X_AXIS
+    y_axis = env.HR_ENVIRONMENT_Y_AXIS if res == "HIGH" else env.ENVIRONMENT_Y_AXIS
+
+    numberOfSquares = x_axis * y_axis
     res = numberOfSquares
-    for i in range(env.HR_ENVIRONMENT_X_AXIS):
-        for j in range(env.HR_ENVIRONMENT_Y_AXIS):
+    for i in range(x_axis):
+        for j in range(y_axis):
             if len(area[i][j]) == 0:
                 res = res - 1
     return res / numberOfSquares
@@ -36,7 +42,10 @@ def evaluate_POI_coverage(*args) -> float:
     from env_parser import Env
     area: list[list[list[int]]] = args[0]
     actions: list[list[Move]] = args[1]
+    res = args[2]
     env = Env.get_instance()
+
+    poiTimeFromEnv = env.HR_POINTS_OF_INTEREST_VISIT_TIMES if res == "HIGH" else env.POINTS_OF_INTEREST_VISIT_TIMES
     surveillance_area = SurveillanceArea.get_instance()
     timeSpentNeedy = [0 for _ in surveillance_area.points_of_interest]
     lastVisit = [0 for _ in surveillance_area.points_of_interest]
@@ -49,12 +58,12 @@ def evaluate_POI_coverage(*args) -> float:
             y = coords.y
             if t in area[x][y]:  # type: ignore
                 lastVisit[i] = t
-            elif t - lastVisit[i] > env.HR_POINTS_OF_INTEREST_VISIT_TIMES[i]:
+            elif t - lastVisit[i] > poiTimeFromEnv[i]:
                 timeSpentNeedy[i] += 1
     totalTimeSpentNeedy = 0
     for needy in timeSpentNeedy:
         totalTimeSpentNeedy += needy
-    maxNeedyTimes = [time - poiTime for poiTime in env.HR_POINTS_OF_INTEREST_VISIT_TIMES]
+    maxNeedyTimes = [time - poiTime for poiTime in poiTimeFromEnv]
     maximumNeediness = 0
     for needy in maxNeedyTimes:
         maximumNeediness += needy

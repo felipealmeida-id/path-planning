@@ -31,7 +31,6 @@ class Yahera(MoveHeuristic):
         uav_possible_moves = uav.possible_moves()
         uav_possible_moves = self._filterMoves(uav_possible_moves, uav.position)
         if uav_current_target is None:
-            return choice(uav_possible_moves)
             selected_move = uav_possible_moves[0]
             return selected_move
         path = list(self.traverser.astar(uav.position.toTuple(), uav_current_target.position.toTuple()))

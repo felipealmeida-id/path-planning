@@ -2,20 +2,25 @@ from enums import Move
 from pather.classes.coord import Coord
 from pather.classes.surveillance_area import SurveillanceArea
 
-def populate_area(actions: list[list[Move]]) -> tuple[list[list[list[int]]], float, float, float]:
+def populate_area(actions: list[list[Move]], res) -> tuple[list[list[list[int]]], float, float, float]:
     from env_parser import Env
     env = Env.get_instance()
     area = SurveillanceArea.get_instance()
     num_uavs = len(actions)
     total_time = len(actions[0])
 
+    y_axis = env.HR_ENVIRONMENT_Y_AXIS if res == "HIGH" else env.ENVIRONMENT_Y_AXIS
+    x_axis = env.HR_ENVIRONMENT_X_AXIS if res == "HIGH" else env.ENVIRONMENT_X_AXIS
+    uav_battery_env = env.HR_UAV_BATTERY if res == "HIGH" else env.UAV_BATTERY
+    uav_charge_time = env.HR_UAV_CHARGE_TIME if res == "HIGH" else env.UAV_CHARGE_TIME
+
     # Pre-allocate memory for res using list comprehension
-    res = [[[] for _ in range(env.HR_ENVIRONMENT_Y_AXIS)] for _ in range(env.HR_ENVIRONMENT_X_AXIS)]
+    res = [[[] for _ in range(y_axis)] for _ in range(x_axis)]
 
     # Initialize currentPos, oob_pen, uav_battery, ooBattery
     currentPos = [Coord(0, 0) for _ in range(num_uavs)]
     oob_pen = [0.0 for _ in range(num_uavs)]
-    uav_battery = [float(env.UAV_BATTERY) for _ in range(num_uavs)]
+    uav_battery = [float(uav_battery_env) for _ in range(num_uavs)]
     ooBattery = [1.0 for _ in range(num_uavs)]
 
     # Define a dictionary to map Move types to coordinate changes
@@ -31,7 +36,7 @@ def populate_area(actions: list[list[Move]]) -> tuple[list[list[list[int]]], flo
     }
 
     time_oob = 0
-    ooBatteryPenalization = 3 / env.UAV_BATTERY
+    ooBatteryPenalization = 3 / uav_battery_env
 
     for uav in range(num_uavs):
         for time in range(total_time):
@@ -49,9 +54,9 @@ def populate_area(actions: list[list[Move]]) -> tuple[list[list[list[int]]], flo
             if (
                 currentPos[uav] == area.start
                 and chosenMove == Move.STAY
-                and uav_battery[uav] < env.UAV_BATTERY
+                and uav_battery[uav] < uav_battery_env
             ):
-                uav_battery[uav] += (env.UAV_BATTERY / env.UAV_CHARGE_TIME)
+                uav_battery[uav] += (uav_battery_env / uav_charge_time)
             # If it is not in the origin it uses battery
             elif (currentPos[uav] != area.start):
                 uav_battery[uav] -= 1
@@ -63,8 +68,8 @@ def populate_area(actions: list[list[Move]]) -> tuple[list[list[list[int]]], flo
                     if ooBattery[uav] < 0:
                         ooBattery[uav] = 0
 
-            how_far_x = min(currentPos[uav].x, env.HR_ENVIRONMENT_X_AXIS - currentPos[uav].x - 1)
-            how_far_y = min(currentPos[uav].y, env.HR_ENVIRONMENT_Y_AXIS - currentPos[uav].y - 1)
+            how_far_x = min(currentPos[uav].x, x_axis - currentPos[uav].x - 1)
+            how_far_y = min(currentPos[uav].y, y_axis - currentPos[uav].y - 1)
             
             if how_far_x < 0 or how_far_y < 0:
                 time_oob += 1
@@ -104,9 +109,9 @@ def is_cohesive(current_position, next_position):
     #i want distance to be less than square root of 2
     return distance <= 1.5
 
-def populate_area_v2(positions):
+def populate_area_v2(positions, res):
     from env_parser import Env
-    is_high_res = True
+    is_high_res = res == "HIGH"
     env = Env.get_instance()
     num_uavs = env.UAV_AMOUNT
     total_time = env.HR_TOTAL_TIME if is_high_res else env.TOTAL_TIME

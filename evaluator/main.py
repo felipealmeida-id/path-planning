@@ -2,7 +2,7 @@ from enums import EvaluatorModules, Move
 from evaluator.area_populator import populate_area, populate_area_v2
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
-
+import json
 
 def evaluateGAN(
     generatedList: list[list[list[int]]], activeModules: list[EvaluatorModules] = None
@@ -76,3 +76,35 @@ def _multi_thread_eval(evaluators, area, grid):
 
 def _constant_return_fun(return_value):
     return lambda *args: return_value
+
+def evaluate_actions(path, res):
+    from evaluator.evaluators import (
+        evaluate_coverage_area,
+        evaluate_POI_coverage,
+    )
+    action_list: list[list[Move]]
+    # file contains various line, eachline should be a list of moves which is an enum
+    with open(path, "r") as f:
+        action_list = [[Move(int(x)) for x in line.strip().split()] for line in f]
+    area, oob_dist, oob_time, battery_evaluation = populate_area(action_list, res)
+    coverage = evaluate_coverage_area(area, res)
+    poiEval = evaluate_POI_coverage(area, action_list, res)
+
+    return (coverage + poiEval) / 2, coverage, poiEval
+    
+def evaluate_cartesian(path, res):
+    from evaluator.evaluators import (
+        evaluate_coverage_area,
+        evaluate_POI_coverage,
+    )
+    grid: list[list[list[int]]]
+    with open(path, "r") as f:
+        grid = json.load(f)
+    area, oob_dist, oob_time, battery_evaluation, cohesion_evaluation = populate_area_v2(grid, res)
+    coverage = evaluate_coverage_area(area, res)
+    # Because evaluate pois does len of this and beacuse it is not a list of moves but cartesian reprsentation
+    grid.pop()
+    poiEval = evaluate_POI_coverage(area, grid, res)
+
+    return (coverage + poiEval) / 2, coverage, poiEval
+    
