@@ -3,6 +3,7 @@ import sys
 import random
 import os
 from torch import manual_seed
+# from pather.main import pather
 from pather.maindos import pather
 from gan_perceptron.main import gan_perceptron
 from drawer.main import draw_route
@@ -42,8 +43,8 @@ if args.module in [ProgramModules.DRAWER.value, ProgramModules.EVALUATOR.value] 
 if args.module == ProgramModules.EVALUATOR.value and not args.mode:
     parser.error("--mode is required for EVALUATOR module")
 
-if args.module == ProgramModules.EVALUATOR.value and not args.res:
-    parser.error("--res is required for EVALUATOR module")
+if args.module in [ProgramModules.EVALUATOR.value, ProgramModules.DRAWER.value] and not args.res:
+    parser.error("--res is required for EVALUATOR and DRAW module")
 
 
 
@@ -54,7 +55,7 @@ if args.module == ProgramModules.EVALUATOR.value and not args.res:
 switch_dict = {
     ProgramModules.PATHER: pather,
     ProgramModules.PERCEPTRON: gan_perceptron,
-    ProgramModules.DRAWER: lambda: draw_route(args.path),
+    ProgramModules.DRAWER: lambda: draw_route(args.path, args.res == 'HIGH'),
     ProgramModules.EVALUATOR: lambda: print(evaluate_actions(args.path, args.res)) if args.mode == 'actions' else print(evaluate_cartesian(args.path,args.res))
 }
 

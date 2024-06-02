@@ -6,16 +6,16 @@ from pather.utils.utilities import move_delta
 
 
 colors = ['b', 'g', 'r', 'c', 'm', 'k']
-HR = False
-def draw_route(file:str):
+
+def draw_route(file:str, HR:bool = False):
     env = Env.get_instance()
     x_dim = env.HR_ENVIRONMENT_X_AXIS if HR else env.ENVIRONMENT_X_AXIS
     y_dim = env.HR_ENVIRONMENT_Y_AXIS if HR else env.ENVIRONMENT_Y_AXIS
     PAUSE_TIME = 0.1
     time = env.HR_TOTAL_TIME if HR else env.TOTAL_TIME
-    _configure_graph()
-    _draw_pois()
-    _draw_obstacles()
+    _configure_graph(HR)
+    _draw_pois(HR)
+    _draw_obstacles(HR)
     route_list = _read_file(file)
     route_list_enum = list(enumerate(route_list))
     uav_pos = [Coord(env.START_X_COORD, env.START_Y_COORD) for _ in route_list]
@@ -41,7 +41,7 @@ def draw_route(file:str):
 #################################################################################################################################################################################################### 
 #################################################################################################################################################################################################### 
 #################################################################################################################################################################################################### 
-def _configure_graph():
+def _configure_graph(HR):
     env = Env.get_instance()
     x_dim = env.HR_ENVIRONMENT_X_AXIS if HR else env.ENVIRONMENT_X_AXIS
     y_dim = env.HR_ENVIRONMENT_Y_AXIS if HR else env.ENVIRONMENT_Y_AXIS
@@ -55,12 +55,13 @@ def _configure_graph():
     plt.xticks(ticks=ticks)
     plt.yticks(ticks=ticks)
 
-def _draw_pois():
+def _draw_pois(HR):
     env = Env.get_instance()
-    for x,y in env.POINTS_OF_INTEREST_COORDS:
+    POIs= env.HR_POINTS_OF_INTEREST_COORDS if HR else env.POINTS_OF_INTEREST_COORDS
+    for x,y in POIs:
         plt.plot(x, y, marker='o', color='k')
 
-def _draw_obstacles():
+def _draw_obstacles(HR):
     pass
     # for badSection in flatten_obstacles(dimensions):
     #     plt.fill([badSection.x, badSection.x+1, badSection.x+1, badSection.x],

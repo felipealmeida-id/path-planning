@@ -84,7 +84,6 @@ class Uav:
             from ..utils.aStar import PathTraverser
             traverser = PathTraverser(env.MAP)
             path = list(traverser.astar(self.position.toTuple(), SA.start.toTuple()))
-            print(len(path))
             return len(path)
         return distance(self.position,SA.start) + 1
 
