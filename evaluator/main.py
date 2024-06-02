@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
 import json
 
+
 def evaluateGAN(
     generatedList: list[list[list[int]]], activeModules: list[EvaluatorModules] = None
 ):
@@ -89,22 +90,27 @@ def evaluate_actions(path, res):
     area, oob_dist, oob_time, battery_evaluation = populate_area(action_list, res)
     coverage = evaluate_coverage_area(area, res)
     poiEval = evaluate_POI_coverage(area, action_list, res)
+    # we set cohesion to 100 because when using actions there are no jumps
+    cohesion_evaluation = 1.0
 
-    return (coverage + poiEval) / 2, coverage, poiEval
+    return (coverage + poiEval + oob_dist + oob_time + cohesion_evaluation) / 5, coverage, poiEval , oob_dist, oob_time, cohesion_evaluation
     
 def evaluate_cartesian(path, res):
+    grid: list[list[list[int]]]
+    with open(path, "r") as f:
+        grid = json.load(f)
+    return _evaluate_cartesian(grid,res)
+   
+
+def _evaluate_cartesian(grid: list[list[list[int]]],res):
     from evaluator.evaluators import (
         evaluate_coverage_area,
         evaluate_POI_coverage,
     )
-    grid: list[list[list[int]]]
-    with open(path, "r") as f:
-        grid = json.load(f)
     area, oob_dist, oob_time, battery_evaluation, cohesion_evaluation = populate_area_v2(grid, res)
     coverage = evaluate_coverage_area(area, res)
     # Because evaluate pois does len of this and beacuse it is not a list of moves but cartesian reprsentation
     grid.pop()
     poiEval = evaluate_POI_coverage(area, grid, res)
 
-    return (coverage + poiEval) / 2, coverage, poiEval
-    
+    return (coverage + poiEval + oob_dist + oob_time + cohesion_evaluation) / 5, coverage, poiEval, oob_dist, oob_time, cohesion_evaluation

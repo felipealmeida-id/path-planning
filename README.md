@@ -30,3 +30,6 @@ Para visualizar una trayectoria lo recomndado es copiar del archivo encontrado e
 ```bash
 python cartesianDraw.py
 ``` 
+
+
+# IMPORTANTE: al usar el Pather con el objetivo de pasar de imagen a trayectoria cartesiana tener en cuenta que este modulo usa todas las setings de low resolution, se deberá copiar las settings de HR a LR momentaneamente antes de correr este modulo con dicho proposito

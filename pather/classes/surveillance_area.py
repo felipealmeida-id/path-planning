@@ -3,7 +3,7 @@ from .coord import Coord
 from .uav import Uav
 from .heuristic import MoveHeuristic
 from .ardemisa import Ardemisa
-from .nefesto import Nefesto
+# from .nefesto import Nefesto
 from .yahera import Yahera
 from .point_of_interest import Point_Of_Interest
 from enums import Move
@@ -27,7 +27,7 @@ class SurveillanceArea:
         self.obstacles = [Obstacle(Coord(x,y)) for (x,y) in env.OBSTACLES_COORDS]
         pois_times_and_coords = zip(env.POINTS_OF_INTEREST_VISIT_TIMES,env.POINTS_OF_INTEREST_COORDS)
         self.points_of_interest = [Point_Of_Interest(visit_time,Coord(x,y)) for visit_time,(x,y) in pois_times_and_coords]
-        self.heuristic = Yahera()
+        self.heuristic = Yahera() if aStar else Ardemisa()
         self.total_time = env.TOTAL_TIME
         self.time_elapsed = 0
         self.aStar = aStar

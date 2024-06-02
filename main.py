@@ -3,8 +3,8 @@ import sys
 import random
 import os
 from torch import manual_seed
-# from pather.main import pather
-from pather.maindos import pather
+from pather.main import pather
+from pather.maindos import pather as patherFromImage
 from gan_perceptron.main import gan_perceptron
 from drawer.main import draw_route
 from utilities import prepare_directory,find_enum_by_value
@@ -20,7 +20,7 @@ parser.add_argument("-e", "--environment", required=True, help="Set the environm
 parser.add_argument("-m", "--module", required=True, help="Specify the module to run")
 parser.add_argument("-p", "--path", help="Path, required for DRAWER or EVALUATOR modules", default='')
 parser.add_argument("--profiler", action='store_true', help="Enable the profiler")
-parser.add_argument("--mode", help="Set the mode for the evaluator, either 'actions' or 'cartesian'")
+parser.add_argument("--mode", help="Set the mode for the evaluator, either 'actions' or 'cartesian' or 'image'")
 parser.add_argument("--res", help="Set the resolution, either HIGH or LOW")
 # Parse the arguments
 args = parser.parse_args()
@@ -53,10 +53,10 @@ if args.module in [ProgramModules.EVALUATOR.value, ProgramModules.DRAWER.value] 
 # and whether to profile it or not.
 
 switch_dict = {
-    ProgramModules.PATHER: pather,
+    ProgramModules.PATHER: patherFromImage if args.mode == "image" else pather,
     ProgramModules.PERCEPTRON: gan_perceptron,
     ProgramModules.DRAWER: lambda: draw_route(args.path, args.res == 'HIGH'),
-    ProgramModules.EVALUATOR: lambda: print(evaluate_actions(args.path, args.res)) if args.mode == 'actions' else print(evaluate_cartesian(args.path,args.res))
+    ProgramModules.EVALUATOR: lambda: print(evaluate_actions(args.path, args.res)) if args.mode == 'actions' else print(evaluate_cartesian(args.path,args.res)) if args.mode == "cartesian" else print("Invalid mode")
 }
 
 if args.profiler:
