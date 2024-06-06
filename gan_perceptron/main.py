@@ -9,7 +9,7 @@ import pstats
 import csv
 
 def gan_perceptron():
-    from .utils import load_dataset,save_progress
+    from .utils import load_dataset,checkpoint
     env = Env.get_instance()
     route_loader = load_dataset()
     epoch_g_losses = []
@@ -24,11 +24,11 @@ def gan_perceptron():
         epoch_d_losses.append(d_loss)
         epoch_eval_avg.append(eval_avg)
         end = time()
-        print(f"{end-start}s")
-        if epoch % 32 == 31:
-            save(discriminator.state_dict(),f"./output/{env.PY_ENV}/discriminator/d_{epoch}")
-            save(generator.state_dict(),f"./output/{env.PY_ENV}/generator/g_{epoch}")
-            save_progress(epoch_g_losses,epoch_d_losses,epoch_eval_avg,epoch)
+        print(
+            f"Epoch {epoch} | D loss: {d_loss} | G loss: {g_loss} | Eval avg: {eval_avg} | Time: {end - start}"
+        )
+        if epoch % 10 == 0:
+            checkpoint(discriminator,generator,epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
 
 def train_epoch(epoch,route_loader,discriminator,generator):
     from .utils import create_noise,output_to_moves

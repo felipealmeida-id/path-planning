@@ -42,10 +42,10 @@ class Discriminator(Module):
         self.optimizer.zero_grad()
         output_real = self(data_real)
         real_smooth_label = self.label_smoothing(real_label)
-        loss_real = self.loss_function(output_real, real_smooth_label)
+        loss_real = self.loss_function(output_real, real_smooth_label) *100
         output_fake = self(data_fake)
         fake_smooth_label = self.label_smoothing(fake_label)
-        loss_fake = self.loss_function(output_fake, fake_smooth_label)
+        loss_fake = self.loss_function(output_fake, fake_smooth_label) *100
         loss_real.backward()
         loss_fake.backward()
         self.optimizer.step()

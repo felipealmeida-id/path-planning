@@ -38,11 +38,13 @@ class Generator(Module):
         real_label = label_real(curr_batch_size)
         self.optimizer.zero_grad()
         output = discriminator(data_fake)
-        eval_weight = epoch/env.EPOCHS
-        regular_weight = (env.EPOCHS-epoch)/env.EPOCHS
+        # eval_weight = epoch/env.EPOCHS
+        # regular_weight = (env.EPOCHS-epoch)/env.EPOCHS
+        eval_weight = 0.2
+        regular_weight = 0.8
         self.loss_fun.adjust_weights(eval_weight,regular_weight)
         self.loss_fun.set_evaluations(eval_tensor)
-        loss = self.loss_fun(output, real_label)
+        loss = self.loss_fun(output, real_label) *100
         loss.backward()
         self.optimizer.step()
         return loss

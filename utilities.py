@@ -1,6 +1,8 @@
 from collections import Counter
+from enums import ProgramModules
 
-def prepare_directory():
+
+def prepare_directory(module_enum: ProgramModules):
     from env_parser import Env
     env = Env.get_instance()
     root = f"./output/{env.PY_ENV}"
@@ -9,20 +11,23 @@ def prepare_directory():
         f"./output/{env.PY_ENV}/gan/discriminator",
         f"./output/{env.PY_ENV}/gan/generated_imgs",
         f"./output/{env.PY_ENV}/pather/generated_paths",
-        f"./inputs/{env.PY_ENV}/"
+        f"./inputs/{env.PY_ENV}/",
+        f"./output/profiling/{env.PY_ENV}"
     ]
-    delete_existing_results(root)
+    if(module_enum == ProgramModules.PERCEPTRON):
+        delete_existing_results(root+"/gan")
     create_necessary_folders(required_folders)
-    unzip_inputs()
+    # unzip_inputs()
+
 
 def unzip_inputs():
     from zipfile import ZipFile
     from os import listdir 
     from env_parser import Env
     env = Env.get_instance()
-    if len(listdir(f'inputs/{env.DATASET}')) == 0:
-        with ZipFile(f'./zip_inputs/{env.DATASET}.zip','r') as zip_ref:
-            zip_ref.extractall(f'inputs/{env.DATASET}')
+    if len(listdir(f'inputs/{env.PY_ENV}')) == 0:
+        with ZipFile(f'./zip_inputs/{env.PY_ENV}.zip','r') as zip_ref:
+            zip_ref.extractall(f'inputs/{env.PY_ENV}')
 
 def delete_existing_results(root:str):
     from shutil import rmtree

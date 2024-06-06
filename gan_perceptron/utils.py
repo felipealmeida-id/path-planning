@@ -1,5 +1,5 @@
 from os import listdir,path,mkdir
-from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor
+from torch import float32, ones as torchOnes, tensor, zeros as torchZeros, randn,Tensor,save
 from torch.utils.data import DataLoader, TensorDataset
 
 from env_parser import Env
@@ -18,19 +18,17 @@ def create_noise(size:int):
 
 def load_dataset():
     env = Env.get_instance()
-    root = f'./inputs/{env.PY_ENV}/input'
+    root = f'./inputs/{env.PY_ENV}'
     if not path.exists(root):
         raise AssertionError('Input directory should exist')
-    subdirs = listdir(root)
+    files = listdir(root)
     all_file_routes:list[list[list[float]]] = []
-    for i in subdirs:
-        files = listdir(f"{root}/{i}")
-        for j in files:
-            file = open(f"{root}/{i}/{j}",'r')
-            file_lines = file.readlines()
-            file.close()
-            file_routes = list(map(lambda x : list(map(float, x.split(' '))),file_lines))
-            all_file_routes.append(file_routes)
+    for i in files:
+        file = open(f"{root}/{i}",'r')
+        file_lines = file.readlines()
+        file.close()
+        file_routes = list(map(lambda x : list(map(float, x.split(' '))),file_lines))
+        all_file_routes.append(file_routes)
     files_tensor_routes = (tensor(all_file_routes,dtype=float32) / 4 - 1).to(env.DEVICE)
     _labels = torchZeros(len(files_tensor_routes)).to(env.DEVICE)
     files_dataset = TensorDataset(files_tensor_routes,_labels)
@@ -61,3 +59,14 @@ def save_progress(g_losses:list[float],d_losses:list[float],eval_avgs:list[float
     g_losses.clear()
     d_losses.clear()
     eval_avgs.clear()
+
+def checkpoint(discriminator,generator,epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch):
+    from env_parser import Env
+    env = Env.get_instance()
+    save(discriminator.state_dict(),f"./output/{env.PY_ENV}/gan/discriminator/d_{epoch}",)
+    save(generator.state_dict(), f"./output/{env.PY_ENV}/gan/generator/g_{epoch}")
+    save_progress(epoch_g_losses, epoch_d_losses, epoch_eval_avg, epoch)
+    noise = create_noise(3)
+    generated_img = generator(noise).to(env.DEVICE).detach()
+    move_tensor = output_to_moves(generated_img)
+    tensor_to_file(move_tensor, f"output/{env.PY_ENV}/gan/generated_imgs/test.{epoch}")
