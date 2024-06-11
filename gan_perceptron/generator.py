@@ -44,7 +44,7 @@ class Generator(Module):
         regular_weight = 0.8
         self.loss_fun.adjust_weights(eval_weight,regular_weight)
         self.loss_fun.set_evaluations(eval_tensor)
-        loss = self.loss_fun(output, real_label) *100
+        loss = self.loss_fun(output, real_label)
         loss.backward()
         self.optimizer.step()
         return loss

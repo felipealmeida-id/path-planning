@@ -33,6 +33,9 @@ def gan_perceptron():
 def train_epoch(epoch,route_loader,discriminator,generator):
     from .utils import create_noise,output_to_moves
     env = Env.get_instance()
+    d_loss_acum = 0
+    g_loss_acum = 0
+    eval_avg_acum = 0
     for _, (images, _) in enumerate(route_loader):
         images = images.to(env.DEVICE)
         curr_batch_size = images.size(0)
@@ -40,15 +43,20 @@ def train_epoch(epoch,route_loader,discriminator,generator):
             data_fake = generator(create_noise(curr_batch_size))
             data_real = images
             d_loss = discriminator.custom_train(data_real,data_fake)
+            d_loss_acum += d_loss
         data_fake = generator(create_noise(curr_batch_size))
         move_list = output_to_moves(data_fake).tolist()
         evaluations = list(map(evaluateGAN, move_list))
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         g_loss = generator.custom_train(discriminator,data_fake,eval_tensor,epoch)
+
+        g_loss_acum += g_loss
         eval_avg = eval_tensor.mean()
+        eval_avg_acum += eval_avg
         eval_tensor.detach()
         del eval_tensor
-    return float(d_loss)/len(route_loader),float(g_loss)/len(route_loader),eval_avg
+    return float(d_loss_acum)/len(route_loader)/env.K,float(g_loss_acum)/len(route_loader),eval_avg_acum / len(route_loader)
+
 
 def profiler():
     pr = cProfile.Profile()

@@ -25,4 +25,4 @@ os.environ['MODULE'] = module
 prepare_directory(module_enum)
 print(f"Running {module} module")
 switch_dict[module_enum]()
-# switch_dict[module_enum]('./output/finalActions/gan/generated_imgs/test.1000.0.txt')
+# switch_dict[module_enum]('./output/finalActions/gan/generated_imgs/test.380.0.txt')
