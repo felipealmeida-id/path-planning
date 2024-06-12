@@ -51,7 +51,14 @@ def _configure_graph(HR):
     plt.ylim(-0.3, y_dim+0.3)
     plt.grid(True)
 
-    ticks = [t for t in range(x_dim)]
+    # # draw grid outside of the environment
+    plt.plot([0, x_dim], [0, 0], color='k')
+    plt.plot([0, 0], [0, y_dim], color='k')
+    plt.plot([0, x_dim], [y_dim, y_dim], color='k')
+    plt.plot([x_dim, x_dim], [0, y_dim], color='k')
+
+    # print grid with a margin of 10 around the environment
+    ticks = range(-10, max(x_dim, y_dim) + 10)
     plt.xticks(ticks=ticks)
     plt.yticks(ticks=ticks)
 
