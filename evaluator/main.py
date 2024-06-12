@@ -6,27 +6,63 @@ import json
 
 
 def evaluateGAN(
-    generatedList: list[list[list[int]]], activeModules: list[EvaluatorModules] = None
-):
+    generatedList: list[list[int]]):
     # parsedList = _parseMoves(generatedList)
-    return _evaluate(generatedList, activeModules)
+    return _evaluate(generatedList)
+
+def _weighted_evaluate(
+        coverage,
+        poiEval,
+        oob_dist,
+        oob_time,
+        cohesion_evaluation):
+       # Define weights
+    weight_coverage = 1
+    weight_poiEval = 2  # Increase the weight of poiEval
+    weight_oob_dist = 1
+    weight_oob_time = 1
+    weight_cohesion = 1
+
+    # Calculate the weighted sum
+    weighted_sum = (
+        weight_coverage * coverage +
+        weight_poiEval * poiEval +
+        weight_oob_dist * oob_dist +
+        weight_oob_time * oob_time +
+        weight_cohesion * cohesion_evaluation
+    )
+
+    # Calculate the sum of weights
+    total_weights = (
+        weight_coverage +
+        weight_poiEval +
+        weight_oob_dist +
+        weight_oob_time +
+        weight_cohesion
+    )
+
+    # Normalize the weighted sum
+    final_score = weighted_sum / total_weights
+
+    return final_score
 
 
 def _evaluate(
-    grid: list[list[list[int]]], active_modules: list[EvaluatorModules] | None = None
-):
-    area, oob_dist, oob_time, battery_evaluation, cohesion_evaluation = populate_area_v2(grid)
-    constant_evals = {
-        EvaluatorModules.OUTOFBOUND: ((oob_dist + oob_time) / 2),
-        EvaluatorModules.BATTERY: battery_evaluation,
-        EvaluatorModules.COHESION: cohesion_evaluation,
-    }
-    evaluators = _determine_evaluators(active_modules, constant_evals)
-    results = {metric: evaluate(area, grid) for metric, evaluate in evaluators.items()}
-    accumulator = 0
-    for v in results.values():
-        accumulator += v
-    return accumulator / len(results)
+    grid: list[list[Move]]):
+    from evaluator.evaluators import (
+        evaluate_coverage_area,
+        evaluate_POI_coverage,
+    )
+    # to Move
+    grid = _parseMoves(grid)
+    res = "LOW"
+    area, oob_dist, oob_time, battery_evaluation = populate_area(grid, res)
+    coverage = evaluate_coverage_area(area, res)
+    poiEval = evaluate_POI_coverage(area, grid, res)
+    # we set cohesion to 100 because when using actions there are no jumps
+    cohesion_evaluation = 1.0
+
+    return _weighted_evaluate(coverage, poiEval, oob_dist, oob_time, cohesion_evaluation)
 
 
 def _parseMoves(listOfLists: list[list[int]]) -> list[list[Move]]:
@@ -78,7 +114,7 @@ def _multi_thread_eval(evaluators, area, grid):
 def _constant_return_fun(return_value):
     return lambda *args: return_value
 
-def evaluate_actions(path, res):
+def evaluate_actions(path, res="LOW"):
     from evaluator.evaluators import (
         evaluate_coverage_area,
         evaluate_POI_coverage,
@@ -90,10 +126,10 @@ def evaluate_actions(path, res):
     area, oob_dist, oob_time, battery_evaluation = populate_area(action_list, res)
     coverage = evaluate_coverage_area(area, res)
     poiEval = evaluate_POI_coverage(area, action_list, res)
-    # we set cohesion to 100 because when using actions there are no jumps
+    # we set cohesion to 1 because when using actions there are no jumps
     cohesion_evaluation = 1.0
 
-    return (coverage + poiEval + oob_dist + oob_time + cohesion_evaluation) / 5, coverage, poiEval , oob_dist, oob_time, cohesion_evaluation
+    return _weighted_evaluate(coverage, poiEval, oob_dist, oob_time, cohesion_evaluation), coverage, poiEval, oob_dist, oob_time, cohesion_evaluation
     
 def evaluate_cartesian(path, res):
     grid: list[list[list[int]]]
@@ -113,4 +149,4 @@ def _evaluate_cartesian(grid: list[list[list[int]]],res):
     grid.pop()
     poiEval = evaluate_POI_coverage(area, grid, res)
 
-    return (coverage + poiEval + oob_dist + oob_time + cohesion_evaluation) / 5, coverage, poiEval, oob_dist, oob_time, cohesion_evaluation
+    return _weighted_evaluate(coverage, poiEval, oob_dist, oob_time, cohesion_evaluation), coverage, poiEval, oob_dist, oob_time, cohesion_evaluation

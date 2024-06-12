@@ -70,12 +70,14 @@ def populate_area(actions: list[list[Move]], res) -> tuple[list[list[list[int]]]
 
             how_far_x = min(currentPos[uav].x, x_axis - currentPos[uav].x - 1)
             how_far_y = min(currentPos[uav].y, y_axis - currentPos[uav].y - 1)
+            # print("current", currentPos[uav])
             
             if how_far_x < 0 or how_far_y < 0:
                 time_oob += 1
-                oob_penalize += min(how_far_x, 0)
-                oob_penalize += min(how_far_y, 0)
-                oob_pen[uav] += oob_penalize
+                # distance taking into account we can move diagonally taking one action
+                oob_penalize = min(how_far_x, how_far_y)
+                if (oob_pen[uav] < -oob_penalize):
+                    oob_pen[uav] = -oob_penalize
             else:
                 # Compute indices once
                 curr_x = int(currentPos[uav].x)
@@ -84,9 +86,8 @@ def populate_area(actions: list[list[Move]], res) -> tuple[list[list[list[int]]]
                 # in the 2d array (aka the area) we append the time in which the drone is in that position
                 res[curr_x][curr_y].append(time)
 
-    max_pen = max(oob_pen)
-    max_pen = -max_pen / ((total_time + 1) * total_time)
-    
+    max_pen = min(oob_pen)
+    max_pen = max_pen / ( total_time)
     return (
         res,
         1 - max_pen,
@@ -149,7 +150,7 @@ def populate_area_v2(positions, res):
             else:
                 uav_battery -= 1
     oob_penalization = 1 - sum(oob_time) / (num_uavs * total_time)
-    oob_dist_penalization = 1 - furthest_oob / ((total_time + 1) * total_time)
+    oob_dist_penalization = 1 - furthest_oob / (total_time)
     oo_battery_penalization = 1 - sum(oo_battery_time) / len(oo_battery_time) / total_time
     cohesion_penalization = 1 - non_cohesive_moves / (num_uavs * (total_time - 1))  # -1 because of looking one step ahead
     return res, oob_dist_penalization, oob_penalization, oo_battery_penalization, cohesion_penalization
