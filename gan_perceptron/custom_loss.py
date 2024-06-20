@@ -11,7 +11,7 @@ class CustomLoss(Module):
         self.regular_weight = regular_weight
 
     def adjust_weights(self,eval_weight:float,regular_weight:float):
-        self.evalWeight = eval_weight
+        self.eval_weight = eval_weight
         self.regular_weight = regular_weight
 
     def set_evaluations(self,evaluations):
@@ -19,8 +19,9 @@ class CustomLoss(Module):
 
     def forward(self, predictions, targets):
         env = Env.get_instance()
+        loss_fun_eval = BCELoss()
         loss_fun = BCELoss()
         reg = self.regular_weight * loss_fun(predictions, targets)
-        evaluation = self.eval_weight * loss_fun(self.evaluations,ones(self.evaluations.size(0)).to(env.DEVICE))
+        evaluation = self.eval_weight * loss_fun_eval(self.evaluations,ones(self.evaluations.size(0)).to(env.DEVICE))
         total = reg + evaluation
         return total
