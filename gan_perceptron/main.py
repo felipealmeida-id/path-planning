@@ -3,7 +3,6 @@ import torch
 from env_parser import Env
 from .generator import Generator
 from .discriminator import Discriminator
-from downscaler.downscaler import Downscaler
 from downscaler.nn_down import NeuralDownscaler
 from evaluator.main import evaluateGAN
 from time import time
@@ -65,6 +64,8 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
             # downscaled_data_fake = downscaled_data_fake / (env.ENVIRONMENT_X_AXIS/2) - 1
 
             # downscaled_data_fake = data_fake
+            # print(downscaled_data_fake.shape)
+            # print(data_real.shape)
             d_loss = Disc.custom_train(data_real, downscaled_data_fake)
             # d_loss = Disc.custom_train(data_real, data_fake)
             d_loss_acum += d_loss
@@ -81,10 +82,10 @@ def train_epoch(epoch:int, route_loader, Disc:Discriminator, Gen:Generator,DSNN:
         downscaled_data_fake = downscale(data_fake)
         # downscaled_data_fake = downscaled_data_fake / (env.ENVIRONMENT_X_AXIS/2) - 1
 
-        # evaluations = [0] * curr_batch_size
+        evaluations = [0] * curr_batch_size
         # downscaled_data_fake = data_fake
-        jump_penalty_tensor = jump_counter(downscaled_data_fake)
-        evaluations = jump_penalty_tensor.tolist()
+        # jump_penalty_tensor = jump_counter(downscaled_data_fake)
+        # evaluations = jump_penalty_tensor.tolist()
         eval_tensor = FloatTensor(evaluations).to(env.DEVICE)
         g_loss = Gen.custom_train(Disc, downscaled_data_fake, eval_tensor, epoch)
         # g_loss = Gen.custom_train(Disc, data_fake, eval_tensor, epoch)
