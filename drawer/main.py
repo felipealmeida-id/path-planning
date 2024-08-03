@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 from enums import Move
 from env_parser import Env
 from pather.classes.coord import Coord
+from pather.classes.obstacle import Obstacle
 from pather.utils.utilities import move_delta
 
-
-colors = ['b', 'g', 'r', 'c', 'm', 'k']
+colors = ['b', 'g', 'c', 'k', 'm', 'r']
 
 def draw_route(file:str, HR:bool = False):
     env = Env.get_instance()
@@ -62,11 +62,13 @@ def _draw_pois(HR):
         plt.plot(x, y, marker='o', color='k')
 
 def _draw_obstacles(HR):
-    pass
-    # for badSection in flatten_obstacles(dimensions):
-    #     plt.fill([badSection.x, badSection.x+1, badSection.x+1, badSection.x],
-    #              [badSection.y, badSection.y, badSection.y+1, badSection.y+1],
-    #              color='black', alpha=0.5)
+    # pass
+    env = Env.get_instance()
+    obstacles = env.OBSTACLES_COORDS
+    for obs in obstacles:
+        obstacle = Obstacle(Coord(obs[0], obs[1]))
+        plt.fill( [obstacle.position.x, obstacle.position.x + 1, obstacle.position.x + 1, obstacle.position.x],
+                  [obstacle.position.y, obstacle.position.y, obstacle.position.y + 1, obstacle.position.y + 1], color='r')
 
 def _read_file(path:str):
     with open(path, 'r') as file:
